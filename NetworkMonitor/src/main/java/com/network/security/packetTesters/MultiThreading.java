@@ -1,10 +1,11 @@
 package com.network.security.packetTesters;
 
+
 public class MultiThreading extends Thread{
     public static int amount = 0;
     public static void main(String[] args){
         MultiThreading thread = new MultiThreading(); // Create a new thread object
-        thread.start(); // Start the new thread (runs run() asynchronously)
+        thread.start(); // Start the new thread (runs run() automatically)
 
         // Simulate delay in main thread
         try{

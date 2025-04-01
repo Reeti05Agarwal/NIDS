@@ -18,6 +18,8 @@ import org.pcap4j.core.PacketListener;
 import org.pcap4j.core.PcapHandle;
 import org.pcap4j.core.PcapNetworkInterface;
 
+import com.network.security.packetTesters.PacketParserMain;
+
 public class PacketParcerBuffer {
     private static final Logger LOGGER = Logger.getLogger(PacketParserMain.class.getName());
 
@@ -39,7 +41,7 @@ public class PacketParcerBuffer {
 
         try {
             PcapHandle handle = packetSnifferService.startCapture(device, listener);
-            handle.loop(50, listener);
+            handle.loop(100, listener);
             handle.close();
         } catch (PcapNativeException | NotOpenException | InterruptedException e) {
             LOGGER.log(Level.SEVERE, "Error during packet capture: ", e);
@@ -115,7 +117,7 @@ public class PacketParcerBuffer {
     
         buffer.position(offset + 9);
         int protocol = buffer.get() & 0xFF;
-        packetData.put("PROTOCOL", protocol);
+        packetData.put("PROTOCOL", PacketUtils.parceProtocol(protocol));
     
         parseTransportLayer(buffer, offset + ihl, protocol, packetData);
     }
@@ -270,6 +272,14 @@ public class PacketParcerBuffer {
             flagMap.put("SYN", (flags & 0x02) != 0);
             flagMap.put("FIN", (flags & 0x01) != 0);
             return flagMap;
+        }
+
+        static String parceProtocol(int protocol) {
+            Map<Integer, String> protocolMap = new HashMap<>();
+            protocolMap.put(1, "ICMP");
+            protocolMap.put(6, "TCP");
+            protocolMap.put(17, "UDP");
+            return protocolMap.get(protocol);
         }
     }
 }
