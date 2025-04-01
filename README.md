@@ -278,6 +278,85 @@ src/ ├── main/ │ ├── java/com/network/security/ │ │ ├── 
   - `src_ip`  
   - `dest_ip`  
   - `src_mac`
+ 
+
+# Rule-Based Intrusion and Anomally Detection System
+
+## Rule-Based IDS
+Uses predefined rules to detect malicious traffic.
+File: .json
+
+### Blacklist Rules
+- blacklisted_ips {lets see}
+- blacklisted_ports {lets see}
+
+### Port Scanning Detection
+- syn_flood_threshold
+- fiin_flood_threshold
+- xmas_flood_threshold
+- null_flood_threshold
+- icmp_flood_threshold
+- port_flood_threshold
+
+### Protocol Violation Rules
+- restricted_protocols
+- non_standard_ports
+- block_external_icmp
+- detect_malformed_packets
+- invalid_tcp_flags
+- packet_size_limits
+
+### Dos/ DDoS Attack
+- syn_flood_threshold
+- icmp_flood_threshold
+- udp_flood_threshold
+- http_flood_threshold
+- slowloris_threshold
+
+### Packet Ispection Rules
+- dpi_keywords
+- payload_length_threshold
+- encrypted_traffic_check
+
+### Brute-Force Attack Detection
+- ssh_brute_force_threshold
+- ftp_brute_force_threshold
+- http_auth_brute_force_threshold
+- email_brute_force_threshold
+
+### Insider Threat Detection
+- lateral_movement_threshold
+- data_exfil_threshold
+- privilege_escalation_detection
+
+### DNS & Web Filtering
+- blacklisted_domains
+- dns_tunneling_threshold
+- typosquatting_detection
+- suspicious_user_agents
+
+
+### Logging & Alerting Config
+- log_level
+- alert_methods  {["email", "syslog"]}
+- log_retention_days
+- adaptive_thresholding
+
+## Anomaly Detection
+Compares traffic patterns to a baseline of normal activity.
+
+### Monitoring
+- Traffic Baseline Monitoring
+- Threshhold Based Detection
+- Machine Learning 
+
+
+### Maintain Packet Statistics
+
+- Total Packets per sec
+- TCP SYN packets per second
+- ICMP packets per second
+
 
 ---
 
