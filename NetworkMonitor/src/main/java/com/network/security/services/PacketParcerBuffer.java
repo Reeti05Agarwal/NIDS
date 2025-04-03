@@ -23,31 +23,6 @@ import com.network.security.packetTesters.PacketParserMain;
 public class PacketParcerBuffer {
     private static final Logger LOGGER = Logger.getLogger(PacketParserMain.class.getName());
 
-    public static void main(String[] args) {
-        PacketSnifferService packetSnifferService = new PacketSnifferService();
-
-        PcapNetworkInterface  device = packetSnifferService.getDevice();
-        if (device == null) {
-            LOGGER.log(Level.SEVERE, "No network device selected!");
-            return;
-        }
-
-        PacketListener listener = packet -> {
-            System.out.println("[DEBUG] Packet received...");
-            // Get Packet Data
-            Map<String, Object> parsedData = parsePacket(packet.getRawData());
-            System.out.println(parsedData);
-        };
-
-        try {
-            PcapHandle handle = packetSnifferService.startCapture(device, listener);
-            handle.loop(100, listener);
-            handle.close();
-        } catch (PcapNativeException | NotOpenException | InterruptedException e) {
-            LOGGER.log(Level.SEVERE, "Error during packet capture: ", e);
-        }
-    }
-
     public static Map<String, Object> parsePacket(byte[] packet) {
         Map<String, Object> packetData = new HashMap<>();
 
@@ -61,7 +36,6 @@ public class PacketParcerBuffer {
 
         // TimeStamp
         packetData.put("TIMESTAMP", new Timestamp(System.currentTimeMillis()));
-
         // Source and Destination MAC addresses
         packetData.put("SRC_MAC", PacketUtils.getMacAddress(buffer, 6));
         packetData.put("DEST_MAC", PacketUtils.getMacAddress(buffer, 0));
@@ -76,11 +50,12 @@ public class PacketParcerBuffer {
             case 0x0800: parseIPv4(buffer, offset, packetData); break;  // IPv4
             case 0x86DD: parseIPv6(buffer, offset, packetData); break;  // IPv6
             case 0x0806: parseARP(buffer, offset, packetData); break;   // ARP
-            case 0x8100: parseVLAN(buffer, offset, packetData); break;  // VLAN
+            //case 0x8100: parseVLAN(buffer, offset, packetData); break;  // VLAN
             default:
                 LOGGER.log(Level.INFO, "Unsupported EtherType: {0}", Integer.toHexString(ethType));
                 packetData.put("INFO", "Unsupported EtherType: " + Integer.toHexString(ethType));         
         }
+
         return packetData;
     }
 
@@ -101,20 +76,15 @@ public class PacketParcerBuffer {
         }
     
         buffer.position(offset);
-        int ihl = (buffer.get() & 0x0F) * 4; // IPv4 header length
-    
+        int ihl = (buffer.get() & 0x0F) * 4; // IPv4 header lengtH
         buffer.position(offset + 8);
         packetData.put("TTL", buffer.get() & 0xFF); 
-    
         packetData.put("SRC_IP", PacketUtils.getIpAddress(buffer, offset + 12)); // Added offset argument
         packetData.put("DEST_IP", PacketUtils.getIpAddress(buffer, offset + 16)); // Added offset argument
-    
         buffer.position(offset + 6);
         packetData.put("FRAGMENT_OFFSET", buffer.getShort() & 0xFFFF);
-    
         buffer.position(offset + 10);
         packetData.put("CHECKSUM", buffer.getShort() & 0xFFFF);
-    
         buffer.position(offset + 9);
         int protocol = buffer.get() & 0xFF;
         packetData.put("PROTOCOL", PacketUtils.parceProtocol(protocol));
@@ -172,8 +142,8 @@ public class PacketParcerBuffer {
         packetData.put("EXTENSION_HEADERS", extensionHeaders);
     }
 
-    // ARP is Responsible for mapping IP Addresses to MAC Addresses within a local network
-    
+    // ARP 
+    //is Responsible for mapping IP Addresses to MAC Addresses within a local network
     private static void parseARP(ByteBuffer buffer, int offset, Map<String, Object> packetData) {
         if (buffer.remaining() < offset + 28) return; // ARP Header is 28 bytes
     
@@ -191,12 +161,15 @@ public class PacketParcerBuffer {
         packetData.put("ARP_OPERATION", operation == 1 ? "REQUEST" : "REPLY"); // Operation type
     }
     
+    /*
     private static void parseVLAN(ByteBuffer buffer, int offset, Map<String, Object> packetData) {
         if (buffer.remaining() < offset + 4) return;
         int vlanID = (buffer.get(offset) & 0x0F) << 8 | (buffer.get(offset + 1) & 0xFF);
         packetData.put("VLAN_ID", vlanID);
     }
+     */
 
+    // TCP
     private static void parseTCP(ByteBuffer buffer, int offset, Map<String, Object> packetData) {
         if (buffer.capacity() < offset + 20) return;
 
@@ -223,6 +196,8 @@ public class PacketParcerBuffer {
         packetData.put("LENGTH", buffer.getShort() & 0xFFFF);
         packetData.put("CHECKSUM", buffer.getShort() & 0xFFFF);
         //packetData.put("PACKET_ID", System.nanoTime());
+        
+        //COUNT FOT UDP PACKETS
     }
     
     private static void parseICMP(ByteBuffer buffer, int offset, Map<String, Object> packetData) {
@@ -234,6 +209,70 @@ public class PacketParcerBuffer {
         packetData.put("CHECKSUM", buffer.getShort() & 0xFFFF);
         packetData.put("PACKET_ID", buffer.getShort() & 0xFFFF);
         packetData.put("SEQUENCE_NUM", buffer.getShort() & 0xFFFF);
+
+        //COUNT FOT ICMP PACKETS
+    
+    }
+
+    private static void parseHTTP(ByteBuffer buffer, Map<String, Object> packetData) {
+        packetData.put("APP_PROTOCOL", "HTTP");
+        packetData.put("PacketID", System.nanoTime()); // Generate PacketID
+
+        // Parse HTTP-specific fields (simple example, you should extend this as needed)
+        byte[] byteArray = new byte[buffer.remaining()];
+        buffer.get(byteArray);
+        String packetStr = new String(byteArray); // Convert to String for HTTP content extraction
+        if (packetStr.contains("GET") || packetStr.contains("POST")) {
+            packetData.put("http_method", packetStr.contains("GET") ? "GET" : "POST");
+        }
+
+        // Extract additional HTTP details (headers)
+        packetData.put("HOST", extractHeader(packetStr, "Host:"));
+        packetData.put("user_agent", extractHeader(packetStr, "User-Agent:"));
+        packetData.put("Auth", extractHeader(packetStr, "Authorization:"));
+        packetData.put("ContentType", extractHeader(packetStr, "Content-Type:"));
+    }
+
+    // Helper method to extract HTTP headers
+    private static String extractHeader(String packetStr, String headerName) {
+        int start = packetStr.indexOf(headerName);
+        if (start == -1) return null;
+        start += headerName.length();
+        int end = packetStr.indexOf("\r\n", start);
+        return packetStr.substring(start, end).trim();
+    }
+
+    // DNS Header parsing (Layer 3)
+    private static void parseDNS(ByteBuffer buffer, Map<String, Object> packetData) {
+        packetData.put("APP_PROTOCOL", "DNS");
+        packetData.put("PacketID", System.nanoTime()); // Generate PacketID
+        
+        // Transaction ID, Flags, Response Code, Query Type, Question
+        packetData.put("TransactionID", buffer.getShort()); // 2 bytes for Transaction ID
+        packetData.put("Flags", buffer.getShort()); // 2 bytes for Flags
+        packetData.put("ResponseCode", buffer.get() & 0xFF); // 1 byte for response code
+        packetData.put("query_type", buffer.getShort() & 0xFFFF); // Query Type (A, AAAA, etc.)
+        
+        // Assuming Question is in the domain name form (e.g., www.example.com)
+        byte[] question = new byte[buffer.remaining()];
+        buffer.get(question);
+        packetData.put("Question", new String(question));
+    }
+
+    // TLS Header parsing (Layer 3)
+    private static void parseTLS(ByteBuffer buffer, Map<String, Object> packetData) {
+        packetData.put("APP_PROTOCOL", "TLS");
+        packetData.put("PacketID", System.nanoTime()); // Generate PacketID
+         
+        
+        // TLS Version, Handshake Type, Content Type (simple example)
+        int tlsVersion = buffer.getShort() & 0xFFFF;
+        int handshakeType = buffer.get(); // 1 byte for handshake type
+        int contentType = buffer.get(); // 1 byte for content type (application data, handshake, etc.)
+        
+        packetData.put("tls_version", tlsVersion);
+        packetData.put("handshake_type", handshakeType);
+        packetData.put("ContentType", contentType);
     }
 
     static class PacketUtils {
