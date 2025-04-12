@@ -122,3 +122,77 @@ CREATE TABLE IF NOT EXISTS Alerts (
     Description TEXT,
     Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+TRIGGERS
+
+💣 Trigger 1: Blacklisted IP Detection (on insert)
+DELIMITER //
+
+CREATE TRIGGER trg_blacklisted_ip
+BEFORE INSERT ON Layer3_IP
+FOR EACH ROW
+BEGIN
+  IF NEW.SrcIP IN (SELECT IP FROM blacklisted_ips)
+     OR NEW.DstIP IN (SELECT IP FROM blacklisted_ips) THEN
+     
+    INSERT INTO Alerts (PacketID, RuleMatched, Severity, Description)
+    VALUES (
+        NEW.PacketID,
+        'BLACKLISTED_IP',
+        'High',
+        CONCAT('Packet contains blacklisted IP: ', 
+            IF(NEW.SrcIP IN (SELECT IP FROM blacklisted_ips), NEW.SrcIP, NEW.DstIP))
+    );
+  END IF;
+END;
+//
+
+DELIMITER ;
+
+
+Trigger 2: Restricted Protocol (e.g., blocked ICMP)
+DELIMITER //
+
+CREATE TRIGGER trg_restricted_protocol
+BEFORE INSERT ON Layer3_IP
+FOR EACH ROW
+BEGIN
+  IF NEW.Protocol IN (SELECT protocol FROM restricted_protocols) THEN
+    INSERT INTO Alerts (PacketID, RuleMatched, Severity, Description)
+    VALUES (
+        NEW.PacketID,
+        'RESTRICTED_PROTOCOL',
+        'Medium',
+        CONCAT('Packet uses restricted protocol: ', NEW.Protocol)
+    );
+  END IF;
+END;
+//
+
+
+Trigger 3: Detect Malformed TCP Flags (like NULL or illegal combos)
+sql
+Copy
+Edit
+DELIMITER //
+
+CREATE TRIGGER trg_invalid_tcp_flags
+BEFORE INSERT ON TCP
+FOR EACH ROW
+BEGIN
+  IF NEW.Flags = '' OR NEW.Flags IS NULL THEN
+    INSERT INTO Alerts (PacketID, RuleMatched, Severity, Description)
+    VALUES (
+        NEW.PacketID,
+        'INVALID_TCP_FLAGS',
+        'Medium',
+        'Malformed TCP packet with empty or null flags.'
+    );
+  END IF;
+END;
+//
+
+
+
+
