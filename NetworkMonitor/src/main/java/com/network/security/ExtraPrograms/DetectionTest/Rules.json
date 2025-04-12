@@ -1,0 +1,19 @@
+{
+    "dpi_rules": [
+      { "keyword": "/etc/passwd", "severity": "high" },
+      { "keyword": "curl", "severity": "low" },
+      { "keyword": "cmd.exe", "severity": "high" },
+      { "keyword": "base64_decode(", "severity": "medium" }
+    ,
+      { "keyword": "curl", "severity": "low", "ignore_if_user_agent_contains": ["curl/7.81.0"] }
+    ,
+      { "keyword": "wget", "severity": "low" },
+      { "keyword": "nc", "severity": "medium" },
+      { "keyword": "powershell", "severity": "high" },
+      { "keyword": "bash", "severity": "medium" },
+      { "keyword": "/bin/bash", "severity": "medium" },
+      { "keyword": "/bin/sh", "severity": "medium" },
+      { "keyword": "/usr/bin/python", "severity": "medium" },
+      { "keyword": "/usr/bin/perl", "severity": "medium" }
+    ]
+}

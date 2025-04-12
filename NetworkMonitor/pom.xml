@@ -26,7 +26,7 @@
     </dependency>
      
 
-  </dependencies>
+  </dependencies>x
   <build>
         <plugins>
             <!-- Specify to the compiler we want Java 1.8 -->
