@@ -18,7 +18,23 @@ This project is a comprehensive network security monitoring system that captures
 
 ## 📂 File Structure
 
-src/ ├── main/ │ ├── java/com/network/security/ │ │ ├── controller/ │ │ ├── service/ │ │ ├── repository/ │ │ ├── model/ │ │ ├── util/ │ │ └── security/ │ ├── resources/ │ │ ├── application.properties │ │ ├── log4j2.xml │ │ └── schema.sql └── test/java/com/network/security/ ├── service/UserServiceTest.java └── service/NetworkMonitorTest.java
+src/
+ ├── main/
+ │   ├── java/com/network/security/
+ │   │   ├── controller/
+ │   │   ├── service/
+ │   │   ├── repository/
+ │   │   ├── model/
+ │   │   ├── util/
+ │   │   ├── security/
+ │   ├── resources/
+ │   │   ├── application.properties
+ │   │   ├── log4j2.xml
+ │   │   ├── schema.sql
+ ├── test/java/com/network/security/
+ │   ├── service/UserServiceTest.java
+ │   ├── service/NetworkMonitorTest.java
+
 
 ---
 
@@ -53,8 +69,8 @@ src/ ├── main/ │ ├── java/com/network/security/ │ │ ├── 
   - Generate PDF/CSV reports on detected anomalies.
   - Store reports for compliance and audit.
 
---- 
-
+---
+ 
 ## ⚠️ Security Attacks
 
 ### ARP Attacks
@@ -90,16 +106,9 @@ src/ ├── main/ │ ├── java/com/network/security/ │ │ ├── 
   - `src_mac`
  
 =======
-
  
 
-
-# Database
-
-## Packet-Data Database
-## Rule_Violation Database
-
->>>>>>> 808a343 (Updated packet handling services and removed IpV4Headers.md)
+ 
 
 # Rule-Based Intrusion and Anomally Detection System
 
@@ -180,120 +189,6 @@ Compares traffic patterns to a baseline of normal activity.
 
 
 <<<<<<< HEAD
-
-# AI - Based Intrusion and Anomally Detection
-
-## Structured Data 
-- Randon Forest
-- XGBoost
-- Support Vector Machines
-- Isolation Forest
-
-## For Sequential Data
-- RNN
-- LSTM
-- Autoencoders
-- Transformer Models
-
-## Reinforcement Learning
-- PPO
-
-
-# Alert & Response System
-
-- Logging it in database
-- Sending an alert to admin {email, syslog}
-- Take Action {Block IP, Update Firewall}
-
-# Visualization
-
-## Real Time Network Traffic Monitoring
-
-- Line graph
-- Number of packets processed 
-
-
-## Suspicios Activity
-
-- Donut Chart
-- Categories of detected threats {Port Snanning, DDoS Attack, Malformed Packets}
-
-## Toop Malicious IP
-
-- Bar Chart
-- IPs that triggered most rules/anomalies.
-- Identifies recurring threats or botnets
-
-## AI Based Anomaly Detection over Time
-
-- Scatter Plot
-- Ai anoaly score per packets/session
-- Detect Suspicious clusters of traffic
-{x-axis: timestamp
-y-axis: Anomaly score}
-
-## Geolocation Mpa of Attack Sources
-
-- World Map
-- Locations of Malicious IPs
-- Locations of high traffic pin points
-
-## Port Activity Analysis
-
-- Stacked Bar Chart
-- Number of Connection attempts per port
-{Identify suspicious access attempts on certain ports}
-
-## Attack Trends Over Time {Time Series Analysis}
-
-- Time-Series Line Chrt
-- Number of Attacks detected per minute/hour/day
-{
-    x-axis: every hour
-    y-axis: total detected intrusion
-    Trendlines: Attack surges
-}
-
-## Top 10 Most Attacked Services & Protocols
-
-- Stacked Bar Chart
-- Number of attacks on different services {HTTP, SSH, FTP}
-
-## Protocol-Based Anomaly Detection
-
-- Bubble Chart
-- Anomaly Score for each protocol detected
-
-## Failed vs Succcessful intrusion attempts
-
-- Cuage Chart
-- Count of total attacks attempts vs successfull intrusion
-
-## Correlation btw Attacks & Traffic Spikes
-
-- Dual-Axis Line chrt
-- Total network traffic vs detected atatcks
-
-# PDF Reports
-
-## Components in PDF
-- Sumaary of intrusion in past & days / 1 Month
-- Most frequent Attack Vector
-- List of Blacklisted IPs
-- AI based Anomaly score analysis
-- Geolocation of attackers
-- Port Scanning attempts
-
-{Apache PDFBox}
-
-
-# Implementing Zero-Copy, Memory-Mapped Buffers, and Ring Buffers in Java NIDS
-
-
-
-=======
-<<<<<<< HEAD
->>>>>>> 7f32f23 (Updated packet handling services and removed IpV4Headers.md)
 ---
 
 ## 🤝 Conclusion
