@@ -1,4 +1,5 @@
-//UN NORMALIZED FORM
+# UN NORMALIZED FORM
+
 CREATE TABLE Packet_UNF (
   PacketID INT,
   timestamp TIMESTAMP,
@@ -80,7 +81,7 @@ CREATE TABLE Packet_UNF (
   tls_contentType TEXT
 );
 
-//anomalies in 1 NF
+# anomalies in 1 NF
 1. Insertion Anomalies:
 An insertion anomaly happens when it is difficult to insert data into the database without introducing inconsistency or redundancy.
 
