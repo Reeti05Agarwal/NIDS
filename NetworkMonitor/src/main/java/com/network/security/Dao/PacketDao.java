@@ -47,9 +47,10 @@ public class PacketDao{
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
             // Insert into Packet_Metadata
-            String insertQuery_Packet_Metadata = "INSERT INTO Packet_Metadata (timestamp) VALUES (?)"; 
+            String insertQuery_Packet_Metadata = "INSERT INTO Packet_Metadata (timestamp, payloadsize) VALUES (?, ?)"; 
             try (PreparedStatement stmt = conn.prepareStatement(insertQuery_Packet_Metadata, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setTimestamp(1, (data.get("TIMESTAMP") instanceof java.sql.Timestamp) ? (java.sql.Timestamp) data.get("TIMESTAMP") : null);
+                stmt.setInt(2, (Integer) data.get("PACKET_SIZE"));
                 stmt.executeUpdate();
                 ResultSet rs = stmt.getGeneratedKeys();
                 long packetID = -1;
@@ -76,8 +77,8 @@ public class PacketDao{
                         packetID, data.get("SRC_PORT"), data.get("DEST_PORT"));
                     switch (data.get("PROTOCOL").toString()) {
                         case "TCP":
-                            insertLayer(conn, "INSERT INTO TCP_Header (PacketID, SequenceNum, AckNum, WindowsSize, FLAGS, CHECKSUM, PAYLOAD) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                                packetID, data.get("SEQUENCE_NUM"), data.get("ACK_NUM"), data.get("WINDOW_SIZE"), data.get("FLAGS"), data.get("CHECKSUM"), data.get("PAYLOAD"));
+                            insertLayer(conn, "INSERT INTO TCP_Header (PacketID, SequenceNum, AckNum, WindowsSize, FLAGS, CHECKSUM, PAYLOAD, options) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                                packetID, data.get("SEQUENCE_NUM"), data.get("ACK_NUM"), data.get("WINDOW_SIZE"), data.get("FLAGS"), data.get("CHECKSUM"), data.get("PAYLOAD"), data.get("TCP_OPTIONS"));
                             break;
                         case "UDP":
                             insertLayer(conn, "INSERT INTO UDP_Header (PacketID, CHECKSUM) VALUES (?, ?)",
@@ -88,9 +89,6 @@ public class PacketDao{
                                 packetID, data.get("ICMP_TYPE"), data.get("ICMP_CODE"), data.get("CHECKSUM"), data.get("SEQUENCE_NUM"));
                             break;
                     }
-                    
-                    
-                    
     
                     // Application Layer
                     insertLayer(conn, "INSERT INTO Application_Layer (PacketID, App_Protocol) VALUES (?, ?)", packetID, data.get("App_Protocol"));
