@@ -1,6 +1,8 @@
 package com.network.security.Intrusion_detection;
 
 public class DpiDetector {
+    /* 
+    THIS WILL ALL GO IN THE MYSQL TABLES
     // Deep Packet Inspection (DPI) Detection
     public static final int DPI_THRESHOLD = 100; // Example threshold for DPI detection
     public static final int DPI_TIMEOUT = 1000; // Example timeout for DPI detection
@@ -54,5 +56,6 @@ public class DpiDetector {
     public static final int COMMAND_INJECTION_MAX_EXECUTIONS = 10; // Example maximum executions for command injection detection
     public static final int COMMAND_INJECTION_MAX_EXECUTION_TIME = 1000; // Example maximum execution time for command injection detection
     // Session Hijacking Detection
+    */
 
 }

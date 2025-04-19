@@ -1,6 +1,9 @@
 package com.network.security.Intrusion_detection;
 
 public class DoSDetector {
+
+    /* 
+    THIS WILL ALL GO IN THE MYSQL TABLES
     // Flood Detection / DoS / DDoS Detection
 
     // TCP Flood Detection
@@ -102,5 +105,8 @@ public class DoSDetector {
 
     // Null Flood Detection
     public static final int NULL_FLOOD_THRESHOLD = 100;
+    */
+    
+    
     
 }

@@ -6,7 +6,25 @@ import com.network.security.entity.Role;
 import java.sql.*;
 import java.util.Map;
 
+/*
+ * FUNCTIONS:
+ * 1. Add User
+ * 2. Update User
+ * 3. Delete User
+ * 4. Change Role
+ */
+
 public class UserDao {
+    /*
+     * set DB_URL=jdbc:mysql://localhost:3306/my_database
+        set DB_USER=app_user
+        set DB_PASSWORD=secretpass
+
+     */
+    String DB_URL = System.getenv("DB_URL");
+    String DB_USER = System.getenv("DB_USER");
+    String DB_PASSWORD = System.getenv("DB_PASSWORD");
+    
     private final Connection connection;
 
     public UserDao(Connection connection) {
@@ -46,15 +64,14 @@ public class UserDao {
             System.err.println("[ERROR] Skipping invalid packet...");
             return;
         }
-
+    
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            // Super Table: Packet Metadata
-            String insertQuery_NewUser = "INSERT INTO User (Username, Password, Role) VALUES (?, ?, ?)"; 
-            PreparedStatement stmt_NewUser = conn.prepareStatement(insertQuery_NewUser);
-            stmt_NewUser.setString(1, (String) UserData.get("Username"));
-            stmt_NewUser.setString(2, (String) UserData.get("Password"));
-            stmt_NewUser.setString(3, (String) UserData.get("Role"));
-             
+            String insertQuery = "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)"; 
+            PreparedStatement stmt = conn.prepareStatement(insertQuery);
+            stmt.setString(1, (String) UserData.get("Username"));
+            stmt.setString(2, (String) UserData.get("Password"));
+            stmt.setString(3, (String) UserData.get("Role"));
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -65,36 +82,31 @@ public class UserDao {
             System.err.println("[ERROR] Skipping invalid packet...");
             return;
         }
-
-        // PROPERLY WRITE THE CODE
+    
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            // Super Table: Packet Metadata
-            String insertQuery_UpdateUser = "UPDATE INTO User (Username, Password, Role) VALUES (?, ?, ?)"; 
-            PreparedStatement stmt_UpdateUser = conn.prepareStatement(insertQuery_UpdateUser);
-            stmt_UpdateUser.setString(1, (String) UserData.get("Username"));
-            stmt_UpdateUser.setString(2, (String) UserData.get("Password"));
-            stmt_UpdateUser.setString(3, (String) UserData.get("Role"));
-             
+            String updateQuery = "UPDATE users SET password_hash = ?, role = ? WHERE username = ?"; 
+            PreparedStatement stmt = conn.prepareStatement(updateQuery);
+            stmt.setString(1, (String) UserData.get("Password"));
+            stmt.setString(2, (String) UserData.get("Role"));
+            stmt.setString(3, (String) UserData.get("Username"));
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+ 
 
-    static void DeleteUser(Map<String, Object> UserData){
+    static void DeleteUser(Map<String, Object> UserData) {
         if (UserData.isEmpty()) {
             System.err.println("[ERROR] Skipping invalid packet...");
             return;
         }
-
-        // PROPERLY WRITE THE CODE
+    
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            // Super Table: Packet Metadata
-            String insertQuery_DeleteUser = "DELETE INTO User (Username, Password, Role) VALUES (?, ?, ?)"; 
-            PreparedStatement stmt_NewUser = conn.prepareStatement(insertQuery_DeleteUser);
-            stmt_NewUser.setString(1, (String) UserData.get("Username"));
-            stmt_NewUser.setString(2, (String) UserData.get("Password"));
-            stmt_NewUser.setString(3, (String) UserData.get("Role"));
-             
+            String deleteQuery = "DELETE FROM users WHERE username = ?";
+            PreparedStatement stmt = conn.prepareStatement(deleteQuery);
+            stmt.setString(1, (String) UserData.get("Username"));
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -105,16 +117,13 @@ public class UserDao {
             System.err.println("[ERROR] Skipping invalid packet...");
             return;
         }
-
-        // PROPERLY WRITE THE CODE
+    
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            // Super Table: Packet Metadata
-            String insertQuery_NewUserRole = "DELETE INTO User (Username, Password, Role) VALUES (?, ?, ?)"; 
-            PreparedStatement stmt_NewRole = conn.prepareStatement(insertQuery_NewUserRole);
-            stmt_NewRole.setString(1, (String) UserData.get("Username"));
-            stmt_NewRole.setString(2, (String) UserData.get("Password"));
-            stmt_NewRole.setString(3, (String) UserData.get("Role"));
-             
+            String updateRoleQuery = "UPDATE users SET role = ? WHERE username = ?";
+            PreparedStatement stmt = conn.prepareStatement(updateRoleQuery);
+            stmt.setString(1, (String) UserData.get("Role"));
+            stmt.setString(2, (String) UserData.get("Username"));
+            stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

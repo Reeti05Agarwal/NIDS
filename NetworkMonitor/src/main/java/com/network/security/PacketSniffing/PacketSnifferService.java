@@ -1,5 +1,4 @@
-package com.network.security.PacketSniffing;
-import com.network.security.ExtraPrograms.packetTesters.PacketParserMain;
+package com.network.security.PacketSniffing; 
 
 import org.pcap4j.core.*;
 import org.pcap4j.util.NifSelector;
@@ -13,7 +12,7 @@ import java.util.logging.Logger;
  */
 
 public class PacketSnifferService {
-    private static final Logger LOGGER = Logger.getLogger(PacketParserMain.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PacketSnifferService.class.getName());
     public PcapNetworkInterface getDevice() {
         try {
             return new NifSelector().selectNetworkInterface();

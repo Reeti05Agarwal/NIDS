@@ -11,12 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.pcap4j.core.PcapNativeException;
-import org.pcap4j.core.NotOpenException;
-
-import org.pcap4j.core.PacketListener;
-import org.pcap4j.core.PcapHandle;
-import org.pcap4j.core.PcapNetworkInterface;
+//import org.pcap4j.core.PcapNativeException;
+//import org.pcap4j.core.NotOpenException;
+//
+//import org.pcap4j.core.PacketListener;
+//import org.pcap4j.core.PcapHandle;
+//import org.pcap4j.core.PcapNetworkInterface;
 
 import com.network.security.ExtraPrograms.packetTesters.PacketParserMain;
 
@@ -304,6 +304,19 @@ public class PacketParcerBuffer {
         packetData.put("WINDOW_SIZE", windowSize);
         packetData.put("TCP_CHECKSUM", checksum);
         packetData.put("URGENT_POINTER", urgentPointer);
+
+        if (dataOffset > 20) {
+            byte[] options = new byte[dataOffset - 20];
+            buffer.get(options);
+            packetData.put("TCP_OPTIONS", options);
+        }
+    
+        // Check if there's a TCP payload (application data)
+        if (buffer.remaining() > 0) {
+            byte[] tcpPayload = new byte[buffer.remaining()];
+            buffer.get(tcpPayload);
+            packetData.put("TCP_PAYLOAD", tcpPayload);
+        }
 
     }
 

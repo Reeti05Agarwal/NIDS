@@ -17,12 +17,7 @@ import java.util.Map;
  * This class will be used to store and retrieve alerts from the database.
  * It will also be used to send alerts to the user.
  * Recieves alerts from the AnomalyDetection class and stores them in the database.
- * 
- * FUNCTIONS:
- * 1. Add User
- * 2. Update User
- * 3. Delete User
- * 4. Change Role
+ *  
  */
 
 public class AlertDao {
