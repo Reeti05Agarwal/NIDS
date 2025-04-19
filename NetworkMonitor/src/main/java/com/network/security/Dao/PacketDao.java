@@ -59,27 +59,38 @@ public class PacketDao{
                     // Data Link Layer
                     insertLayer(conn, "INSERT INTO Data_Link_Layer (PacketID, srcMAC, destMAC) VALUES (?, ?, ?)", packetID, data.get("SRC_MAC"), data.get("DEST_MAC"));
                     insertLayer(conn, "INSERT INTO Ethernet_Header (PacketID, ETH_TYPE) VALUES (?, ?)", packetID, data.get("ETH_TYPE"));
-                    insertLayer(conn, "INSERT INTO WiFi_Header (PacketID, WIFI_FRAME_CONTROL, BSSID, SEQ_CONTROL) VALUES (?, ?, ?, ?)",
+                    insertLayer(conn, "INSERT INTO WiFi_Header (PacketID, FRAME_CONTROL, BSSID, SEQ_CONTROL) VALUES (?, ?, ?, ?)",
                         packetID, data.get("WIFI_FRAME_CONTROL"), data.get("BSSID"), data.get("SEQ_CONTROL"));
     
                     // Network Layer
                     insertLayer(conn, "INSERT INTO Network_Layer (PacketID, srcIP, destIP) VALUES (?, ?, ?)", packetID, data.get("SRC_IP"), data.get("DEST_IP"));
-                    insertLayer(conn, "INSERT INTO IPv4_Header (PacketID, TTL, FRAGMENT_OFFSET, CHECKSUM, PROTOCOL) VALUES (?, ?, ?, ?, ?)",
-                        packetID, data.get("TTL"), data.get("FRAGMENT_OFFSET"), data.get("CHECKSUM"), data.get("PROTOCOL"));
-                    insertLayer(conn, "INSERT INTO IPv6_Header (PacketID, TRAFFIC_CLASS, HOP_LIMIT, FLOW_LABEL, EXTENSION_HEADERS) VALUES (?, ?, ?, ?, ?)",
-                        packetID, data.get("TRAFFIC_CLASS"), data.get("HOP_LIMIT"), data.get("FLOW_LABEL"), data.get("EXTENSION_HEADERS"));
+                    insertLayer(conn, "INSERT INTO IPv4_Header (PacketID, IP_VERSION, IP_FLAGS, TTL, CHECKSUM, PROTOCOL) VALUES (?, ?, ?, ?, ?, ?)",
+                        packetID, data.get("IP_VERSION"), data.get("IP_FLAGS"), data.get("TTL"), data.get("CHECKSUM"), data.get("PROTOCOL"));
+                    insertLayer(conn, "INSERT INTO IPv6_Header (PacketID, IP_VERSION, TRAFFIC_CLASS, HOP_LIMIT, FLOW_LABEL, EXTENSIONHEADERS) VALUES (?, ?, ?, ?, ?, ?)",
+                        packetID, data.get("IP_VERSION"), data.get("TRAFFIC_CLASS"), data.get("HOP_LIMIT"), data.get("FLOW_LABEL"), data.get("EXTENSION_HEADERS"));
                     insertLayer(conn, "INSERT INTO ARP_Header (PacketID, HTYPE, PTYPE, HLEN, PLEN, OPER, ARP_OPERATION) VALUES (?, ?, ?, ?, ?, ?, ?)",
                         packetID, data.get("HTYPE"), data.get("PTYPE"), data.get("HLEN"), data.get("PLEN"), data.get("OPER"), data.get("ARP_OPERATION"));
     
                     // Transport Layer
-                    insertLayer(conn, "INSERT INTO Transport_Layer (PacketID, SRC_PORT, DEST_PORT) VALUES (?, ?, ?)",
+                    insertLayer(conn, "INSERT INTO Transport_Layer (PacketID, srcPort, destPort) VALUES (?, ?, ?)",
                         packetID, data.get("SRC_PORT"), data.get("DEST_PORT"));
-                    insertLayer(conn, "INSERT INTO TCP_Header (PacketID, SEQUENCE_NUM, ACK_NUM, WINDOW_SIZE, FLAGS) VALUES (?, ?, ?, ?, ?)",
-                        packetID, data.get("SEQUENCE_NUM"), data.get("ACK_NUM"), data.get("WINDOW_SIZE"), data.get("FLAGS"));
-                    insertLayer(conn, "INSERT INTO UDP_Header (PacketID, LENGTH, CHECKSUM) VALUES (?, ?, ?)",
-                        packetID, data.get("LENGTH"), data.get("CHECKSUM"));
-                    insertLayer(conn, "INSERT INTO ICMP_Header (PacketID, ICMP_TYPE, ICMP_CODE, CHECKSUM, PACKET_ID, SEQUENCE_NUM) VALUES (?, ?, ?, ?, ?, ?)",
-                        packetID, data.get("ICMP_TYPE"), data.get("ICMP_CODE"), data.get("CHECKSUM"), data.get("PACKET_ID"), data.get("SEQUENCE_NUM"));
+                    switch (data.get("PROTOCOL").toString()) {
+                        case "TCP":
+                            insertLayer(conn, "INSERT INTO TCP_Header (PacketID, SequenceNum, AckNum, WindowsSize, FLAGS, CHECKSUM, PAYLOAD) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                                packetID, data.get("SEQUENCE_NUM"), data.get("ACK_NUM"), data.get("WINDOW_SIZE"), data.get("FLAGS"), data.get("CHECKSUM"), data.get("PAYLOAD"));
+                            break;
+                        case "UDP":
+                            insertLayer(conn, "INSERT INTO UDP_Header (PacketID, CHECKSUM) VALUES (?, ?)",
+                                packetID, data.get("CHECKSUM"));
+                            break;
+                        case "ICMP":
+                            insertLayer(conn, "INSERT INTO ICMP_Header (PacketID, TYPE, CODE, CHECKSUM, SEQUENCE_NUM) VALUES (?, ?, ?, ?, ?)",
+                                packetID, data.get("ICMP_TYPE"), data.get("ICMP_CODE"), data.get("CHECKSUM"), data.get("SEQUENCE_NUM"));
+                            break;
+                    }
+                    
+                    
+                    
     
                     // Application Layer
                     insertLayer(conn, "INSERT INTO Application_Layer (PacketID, App_Protocol) VALUES (?, ?)", packetID, data.get("App_Protocol"));

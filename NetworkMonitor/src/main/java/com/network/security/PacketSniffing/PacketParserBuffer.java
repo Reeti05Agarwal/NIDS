@@ -14,8 +14,7 @@ import com.network.security.util.PacketUtils;
  * 1. Layered Packet Parsing
  * Protocol handling and Extensibility
  * 
- * IMPORVEMENT:
- * 1. Buffer Overflow Protection
+ * IMPORVEMENT: 
  * 3. Have Thread pooling
  * 4. Handle TCP Option  
  */
