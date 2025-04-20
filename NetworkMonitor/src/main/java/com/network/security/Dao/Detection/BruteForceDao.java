@@ -13,7 +13,7 @@ public class BruteForceDao {
 
     // Load the brute force detection thresholds from the database
     private void loadBruteForceThresholds(Connection conn) {
-        String sql = "SELECT failed_attempt_threshold, time_window_sec FROM view_brute_force_rules";
+        String sql = "SELECT failed_attempt_threshold, time_window_sec FROM brute_force_rules";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 

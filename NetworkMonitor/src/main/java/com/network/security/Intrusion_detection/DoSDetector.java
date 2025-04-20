@@ -3,6 +3,7 @@ package com.network.security.Intrusion_detection;
 public class DoSDetector {
     private int dosPacketThreshold;
     private int dosTimeWindow;
+    private String dosAttackType;
 
     public DoSDetector(int dosPacketThreshold, int dosTimeWindow) {
         this.dosPacketThreshold = dosPacketThreshold;
@@ -31,5 +32,12 @@ public class DoSDetector {
 
     public void setDosTimeWindow(int dosTimeWindow) {
         this.dosTimeWindow = dosTimeWindow;
+    }
+
+    public String getDosAttackType() {
+        return dosAttackType;
+    }
+    public void setDosAttackType(String dosAttackType) {
+        this.dosAttackType = dosAttackType;
     }
 }

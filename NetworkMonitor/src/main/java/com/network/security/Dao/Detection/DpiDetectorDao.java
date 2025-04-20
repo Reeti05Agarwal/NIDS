@@ -5,23 +5,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.network.security.Intrusion_detection.BruteForceDetector;
+import com.network.security.Intrusion_detection.DpiDetector;
 
-public class DpiDetector {
-    private BruteForceDetector bruteForceDetector;
+public class DpiDetectorDao {
+    private DpiDetector dpiDetector;
 
     // Insert a new brute force detection rule into the database
 
     // Load the brute force detection thresholds from the database
-    private void loadBruteForceThresholds(Connection conn) {
-        String sql = "SELECT failed_attempt_threshold, time_window_sec FROM view_brute_force_rules";
+    private void loadDpiDetector(Connection conn) {
+        String sql = "SELECT keyword FROM dpi_keywords ";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                bruteForceDetector.setBrutePacketThreshold(rs.getInt("failed_attempt_threshold"));
-                bruteForceDetector.setBruteTimeWindow(rs.getInt("time_window_sec"));
-            }
+                dpiDetector.setKeyword(rs.getString("keyword"));
+             }
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load brute force thresholds");

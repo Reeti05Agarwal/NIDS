@@ -13,14 +13,15 @@ public class DNSWebFilterDao {
     // Insert a new brute force detection rule into the database
 
     // Load the brute force detection thresholds from the database
-    private void loadBruteForceThresholds(Connection conn) {
-        String sql = "SELECT failed_attempt_threshold, time_window_sec FROM view_brute_force_rules";
+    private void loadDnsWebFilterThreshold(Connection conn) {
+        String sql = "SELECT pattern, threshold, time_window_seconds FROM dns_web_filtering_rules ";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                dnsWebFilterDetector.setDNSWebFilterDetector(rs.getInt("failed_attempt_threshold"));
-                dnsWebFilterDetector.setDNSWebFilterDetector(rs.getInt("time_window_sec"));
+                dnsWebFilterDetector.setDnsWebFilterPattern(rs.getString("pattern"));
+                dnsWebFilterDetector.setDnsWebFilterThreshold(rs.getInt("threshold"));
+                dnsWebFilterDetector.setDnsWebFilterTimeWindow(rs.getInt("time_window_seconds"));
             }
 
         } catch (SQLException e) {

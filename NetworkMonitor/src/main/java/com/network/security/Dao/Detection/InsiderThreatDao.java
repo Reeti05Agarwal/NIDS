@@ -5,22 +5,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import com.network.security.Intrusion_detection.BruteForceDetector;
+import com.network.security.Intrusion_detection.InsiderThreatDetector;
 
 public class InsiderThreatDao {
-    private BruteForceDetector bruteForceDetector;
+    private InsiderThreatDetector insiderThreatDetector;
 
     // Insert a new brute force detection rule into the database
 
     // Load the brute force detection thresholds from the database
-    private void loadBruteForceThresholds(Connection conn) {
-        String sql = "SELECT failed_attempt_threshold, time_window_sec FROM view_brute_force_rules";
+    private void loadInsiderThreatDetector(Connection conn) {
+        String sql = "SELECT access_threshold, time_window_sec FROM insider_threat_rules ";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                bruteForceDetector.setBrutePacketThreshold(rs.getInt("failed_attempt_threshold"));
-                bruteForceDetector.setBruteTimeWindow(rs.getInt("time_window_sec"));
+                insiderThreatDetector.setInsiderPacketThreshold(rs.getInt("access_threshold"));
+                insiderThreatDetector.setInsiderTimeWindow(rs.getInt("time_window_sec"));
             }
 
         } catch (SQLException e) {
