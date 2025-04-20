@@ -18,9 +18,9 @@ public class RuleServices {
         if (conn != null) {
 
             // 
-            bruteForceDetector = new BruteForceDetector(0, 0);
+            bruteForceDetector = new BruteForceDetector();
             bruteForceDao = new BruteForceDao(bruteForceDetector);
-            bruteForceDao.loadBruteForceThresholds(conn);
+            bruteForceDao.loadBruteForceThresholds(conn, "defaultThreshold");
 
             
 

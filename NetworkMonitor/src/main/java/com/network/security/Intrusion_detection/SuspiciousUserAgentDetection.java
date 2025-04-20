@@ -1,24 +1,28 @@
 package com.network.security.Intrusion_detection;
 
-public class SuspiciousUserAgentDetection {
-    private String sudKeyword;
+import java.util.List;
 
-    public SuspiciousUserAgentDetection(String sudKeyword) {
-        this.sudKeyword = sudKeyword.toLowerCase();
+public class SuspiciousUserAgentDetection {
+    private List<String> sudKeyword;
+
+    public SuspiciousUserAgentDetection(List<String> sudKeyword) {
+        this.sudKeyword = sudKeyword;
     }
 
-    public String getSudKeyword() {
+    public List<String> getSudKeyword() {
         return sudKeyword;
     }
 
-    public void setSudKeyword(String sudKeyword) {
-        this.sudKeyword = sudKeyword.toLowerCase();
+    public void setSudKeyword(List<String> sudKeyword) {
+        this.sudKeyword = sudKeyword;
     }
 
     public boolean detect(String userAgent) {
-        if (userAgent != null && userAgent.toLowerCase().contains(sudKeyword)) {
-            System.out.println("Suspicious User-Agent detected: " + userAgent);
-            return true;
+        for (String keyword : sudKeyword) {
+            if (userAgent != null && userAgent.toLowerCase().contains(keyword.toLowerCase())) {
+                System.out.println("Suspicious User-Agent detected: " + userAgent);
+                return true;
+            }
         }
         return false;
     }

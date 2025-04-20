@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.network.security.Intrusion_detection.SuspiciousUserAgentDetection;
 
@@ -14,8 +16,10 @@ public class SuspiciousUserAgentDao {
     public void insertSuspiciousUserAgent(Connection conn) {
         String sql = "INSERT INTO suspicious_user_agents (user_agent) VALUES (?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, suspiciousUserAgentDetection.getSudKeyword());
-            stmt.executeUpdate();
+            for (String userAgent : suspiciousUserAgentDetection.getSudKeyword()) {
+                stmt.setString(1, userAgent);
+                stmt.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to insert brute force detection rule");
             e.printStackTrace();
@@ -24,13 +28,15 @@ public class SuspiciousUserAgentDao {
 
     // Load the brute force detection thresholds from the database
     public void loadSuspiciousUserAgent(Connection conn) {
+        List<String> agents = new ArrayList<>();
         String sql = "SELECT user_agent FROM suspicious_user_agents";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                suspiciousUserAgentDetection.setSudKeyword(rs.getString("user_agent"));
-             }
+                agents.add(rs.getString("user_agent"));
+            }
+            suspiciousUserAgentDetection.setSudKeyword(agents);
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load brute force thresholds");

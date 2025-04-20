@@ -1,25 +1,32 @@
 package com.network.security.Intrusion_detection;
 
-public class DpiDetector {
-    private String keyword;
+import java.util.List;
 
-    public DpiDetector(String keyword) {
-        this.keyword = keyword.toLowerCase();
+public class DpiDetector {
+    private List<String> keyword;
+
+    public DpiDetector(List<String> keyword) {
+        this.keyword = keyword;
     }
 
-    public String getKeyword() {
+    public List<String> getKeyword() {
         return keyword;
     }
 
-    public void setKeyword(String keyword) {
-        this.keyword = keyword.toLowerCase();
+    public void setKeyword(List<String> keyword) {
+        this.keyword = keyword;
     }
 
     public boolean detect(String content) {
-        if (content != null && content.toLowerCase().contains(keyword)) {
-            System.out.println("DPI violation detected.");
-            return true;
+        for (String keyword : this.keyword) {
+            if (isDpiViolation(content, keyword)) {
+                return true;
+            }   
         }
         return false;
+    }
+
+    private boolean isDpiViolation(String content, String keyword) {
+        return content != null && content.toLowerCase().contains(keyword.toLowerCase());
     }
 }

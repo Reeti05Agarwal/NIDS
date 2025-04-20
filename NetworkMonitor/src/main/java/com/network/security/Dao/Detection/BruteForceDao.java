@@ -5,15 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.network.security.Intrusion_detection.BruteForceDetector;
-import com.network.security.util.MYSQLconnection;
-
 
 public class BruteForceDao {
     private BruteForceDetector bruteForceDetector;
 
-    public BruteForceDao(BruteForceDetector bruteForceDetector) {
-        this.bruteForceDetector = bruteForceDetector;
-    }
+ 
 
     // Insert a new brute force detection rule into the database
     public void insertBruteForceRule(Connection conn, String service, int threshold, int timeWindow) {

@@ -1,13 +1,17 @@
 package com.network.security.Intrusion_detection;
 
+/*
+ * Holds threshold/time window and runs detection logic
+ */
+
 public class BruteForceDetector {
     private int brutePacketThreshold;
     private int bruteTimeWindow;
 
-    public BruteForceDetector(int brutePacketThreshold, int bruteTimeWindow) {
-        this.brutePacketThreshold = brutePacketThreshold;
-        this.bruteTimeWindow = bruteTimeWindow;
-    }
+    // public BruteForceDetector(int brutePacketThreshold, int bruteTimeWindow) {
+    //     this.brutePacketThreshold = brutePacketThreshold;
+    //     this.bruteTimeWindow = bruteTimeWindow;
+    // }
 
     // Getters and Setters
     public int getBrutePacketThreshold() {

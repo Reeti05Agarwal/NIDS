@@ -4,11 +4,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.network.security.Intrusion_detection.ExtICMPDetection;
 
 public class ExtICMPDao {
     private ExtICMPDetection extICMPDetection;
+
+    
 
     // Insert a new brute force detection rule into the database
     public void insertExtICMPDetection(Connection conn) {
@@ -24,13 +28,15 @@ public class ExtICMPDao {
 
     // Load the brute force detection thresholds from the database
     public void loadBruteForceThresholds(Connection conn) {
+        List<String> ipList = new ArrayList<>();
         String sql = "SELECT source_ip FROM external_icmp_block ";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                extICMPDetection.setExticmpIPAddress(rs.getString("source_ip"));
-             }
+                ipList.add(rs.getString("source_ip"));
+            }
+            extICMPDetection.setExticmpIPAddress(ipList);
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load brute force thresholds");
