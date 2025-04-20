@@ -11,7 +11,7 @@ public class DNSWebFilterDao {
     private DNSWebFilterDetector dnsWebFilterDetector;
 
     // Insert a new brute force detection rule into the database
-    private void insertDnsWebFilterRule(Connection conn, String pattern, int threshold, int timeWindow) {
+    public void insertDnsWebFilterRule(Connection conn, String pattern, int threshold, int timeWindow) {
         String sql = "INSERT INTO dns_web_filtering_rules (pattern, threshold, time_window_seconds) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, pattern);
@@ -25,10 +25,11 @@ public class DNSWebFilterDao {
     }
 
     // Load the brute force detection thresholds from the database
-    private void loadDnsWebFilterThreshold(Connection conn) {
-        String sql = "SELECT pattern, threshold, time_window_seconds FROM dns_web_filtering_rules ";
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+    public void loadDnsWebFilterThreshold(Connection conn, String pattern) {
+        String sql = "SELECT pattern, threshold, time_window_seconds FROM dns_web_filtering_rules WHERE pattern = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, pattern);
+            ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 dnsWebFilterDetector.setDnsWebFilterPattern(rs.getString("pattern"));
@@ -37,13 +38,13 @@ public class DNSWebFilterDao {
             }
 
         } catch (SQLException e) {
-            System.err.println("[ERROR] Failed to load brute force thresholds");
+            System.err.println("[ERROR] Failed to load DNS web filter thresholds");
             e.printStackTrace();
         }
     }
 
     // update threshold
-    private void updateDnsWebFilterThreshold(Connection conn, int newThreshold, int id) {
+    public void updateDnsWebFilterThreshold(Connection conn, int newThreshold, int id) {
         String sql = "UPDATE dns_web_filtering_rules SET threshold = ? WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, newThreshold);
@@ -56,7 +57,7 @@ public class DNSWebFilterDao {
     }
 
     // update time window
-    private void updateDnsWebFilterTimeWindow(Connection conn, int newTimeWindow, int id) {
+    public void updateDnsWebFilterTimeWindow(Connection conn, int newTimeWindow, int id) {
         String sql = "UPDATE dns_web_filtering_rules SET time_window_seconds = ? WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, newTimeWindow);
@@ -70,7 +71,7 @@ public class DNSWebFilterDao {
 
 
     // delete
-    private void deleteDnsWebFilterRule(Connection conn, int id) {
+    public void deleteDnsWebFilterRule(Connection conn, int id) {
         String sql = "DELETE FROM dns_web_filtering_rules WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);

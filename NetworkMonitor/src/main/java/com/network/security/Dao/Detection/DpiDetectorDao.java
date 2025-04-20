@@ -11,7 +11,7 @@ public class DpiDetectorDao {
     private DpiDetector dpiDetector;
 
     // Insert a new brute force detection rule into the database
-    private void insertDpiDetector(Connection conn) {
+    public void insertDpiDetector(Connection conn) {
         String sql = "INSERT INTO dpi_keywords (keyword) VALUES (?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, dpiDetector.getKeyword());
@@ -23,7 +23,7 @@ public class DpiDetectorDao {
     }
 
     // Load the brute force detection thresholds from the database
-    private void loadDpiDetector(Connection conn) {
+    public void loadDpiDetector(Connection conn) {
         String sql = "SELECT keyword FROM dpi_keywords ";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -39,7 +39,28 @@ public class DpiDetectorDao {
     }
 
     // update 
+    public void updateDpiDetector(Connection conn, String newKeyword, int id) {
+        String sql = "UPDATE dpi_keywords SET keyword = ? WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newKeyword);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to update DPI detection rule");
+            e.printStackTrace();
+        }
+    }
 
 
     // delete
+    public void deleteDpiDetector(Connection conn, int id) {
+        String sql = "DELETE FROM dpi_keywords WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to delete DPI detection rule");
+            e.printStackTrace();
+        }
+    }
 }

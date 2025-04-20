@@ -1,24 +1,28 @@
 package com.network.security.Intrusion_detection;
 
-public class ExtICMPDetection {
-    private String exticmpIPAddress;
+import java.util.List;
 
-    public ExtICMPDetection(String exticmpIPAddress) {
+public class ExtICMPDetection {
+    private List<String> exticmpIPAddress;
+
+    public ExtICMPDetection(List<String> exticmpIPAddress) {
         this.exticmpIPAddress = exticmpIPAddress;
     }
 
-    public String getExticmpIPAddress() {
+    public List<String> getExticmpIPAddress() {
         return exticmpIPAddress;
     }
 
-    public void setExticmpIPAddress(String exticmpIPAddress) {
+    public void setExticmpIPAddress(List<String> exticmpIPAddress) {
         this.exticmpIPAddress = exticmpIPAddress;
     }
 
     public boolean detect(String packetIP) {
-        if (packetIP.equalsIgnoreCase(exticmpIPAddress)) {
-            System.out.println("ICMP packet detected from external IP: " + exticmpIPAddress);
-            return true;
+        for (String ip : exticmpIPAddress) {
+            if (packetIP.equalsIgnoreCase(ip)) {
+                System.out.println("ICMP packet detected from external IP: " + exticmpIPAddress);
+                return true;
+            }
         }
         return false;
     }

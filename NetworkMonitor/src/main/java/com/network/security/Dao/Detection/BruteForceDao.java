@@ -5,15 +5,21 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.network.security.Intrusion_detection.BruteForceDetector;
+import com.network.security.util.MYSQLconnection;
+
 
 public class BruteForceDao {
     private BruteForceDetector bruteForceDetector;
 
+    public BruteForceDao(BruteForceDetector bruteForceDetector) {
+        this.bruteForceDetector = bruteForceDetector;
+    }
+
     // Insert a new brute force detection rule into the database
-    private void insertBruteForceRule(Connection conn, String ruleName, int threshold, int timeWindow) {
-        String sql = "INSERT INTO brute_force_rules (rule_name, failed_attempt_threshold, time_window_sec) VALUES (?, ?, ?)";
+    public void insertBruteForceRule(Connection conn, String service, int threshold, int timeWindow) {
+        String sql = "INSERT INTO brute_force_rules (service, failed_attempt_threshold, time_window_sec) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, ruleName);
+            stmt.setString(1, service);
             stmt.setInt(2, threshold);
             stmt.setInt(3, timeWindow);
             stmt.executeUpdate();
@@ -24,10 +30,11 @@ public class BruteForceDao {
     }
 
     // Load the brute force detection thresholds from the database
-    private void loadBruteForceThresholds(Connection conn) {
-        String sql = "SELECT failed_attempt_threshold, time_window_sec FROM brute_force_rules";
-        try (PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+    public void loadBruteForceThresholds(Connection conn, String service) {
+        String sql = "SELECT failed_attempt_threshold, time_window_sec FROM brute_force_rules where service = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, service);
+            ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 bruteForceDetector.setBrutePacketThreshold(rs.getInt("failed_attempt_threshold"));
@@ -41,7 +48,7 @@ public class BruteForceDao {
     }
 
     // update threshold
-    private void updateBruteForceThreshold(Connection conn, int newThreshold, int id) {
+    public void updateBruteForceThreshold(Connection conn, int newThreshold, int id) {
         String sql = "UPDATE brute_force_rules SET failed_attempt_threshold = ? WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, newThreshold);
@@ -54,7 +61,7 @@ public class BruteForceDao {
     }
 
     // update time window
-    private void updateBruteForceTimeWindow(Connection conn, int newTimeWindow, int id) {
+    public void updateBruteForceTimeWindow(Connection conn, int newTimeWindow, int id) {
         String sql = "UPDATE brute_force_rules SET time_window_sec = ? WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, newTimeWindow);
@@ -67,7 +74,7 @@ public class BruteForceDao {
     }
 
     // delete
-    private void deleteBruteForceRule(Connection conn, int id) {
+    public void deleteBruteForceRule(Connection conn, int id) {
         String sql = "DELETE FROM brute_force_rules WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);

@@ -11,7 +11,7 @@ public class SuspiciousUserAgentDao {
     private SuspiciousUserAgentDetection suspiciousUserAgentDetection;
 
     // Insert a new brute force detection rule into the database
-    private void insertSuspiciousUserAgent(Connection conn) {
+    public void insertSuspiciousUserAgent(Connection conn) {
         String sql = "INSERT INTO suspicious_user_agents (user_agent) VALUES (?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, suspiciousUserAgentDetection.getSudKeyword());
@@ -23,7 +23,7 @@ public class SuspiciousUserAgentDao {
     }
 
     // Load the brute force detection thresholds from the database
-    private void loadSuspiciousUserAgent(Connection conn) {
+    public void loadSuspiciousUserAgent(Connection conn) {
         String sql = "SELECT user_agent FROM suspicious_user_agents";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -39,7 +39,7 @@ public class SuspiciousUserAgentDao {
     }
 
     // update 
-    private void updateSuspiciousUserAgent(Connection conn, String newUserAgent, int id) {
+    public void updateSuspiciousUserAgent(Connection conn, String newUserAgent, int id) {
         String sql = "UPDATE suspicious_user_agents SET user_agent = ? WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, newUserAgent);
@@ -53,7 +53,7 @@ public class SuspiciousUserAgentDao {
 
 
     // delete
-    private void deleteSuspiciousUserAgent(Connection conn, int id) {
+    public void deleteSuspiciousUserAgent(Connection conn, int id) {
         String sql = "DELETE FROM suspicious_user_agents WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);

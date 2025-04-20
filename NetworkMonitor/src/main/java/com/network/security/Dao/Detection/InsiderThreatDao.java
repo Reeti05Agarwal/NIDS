@@ -11,7 +11,7 @@ public class InsiderThreatDao {
     private InsiderThreatDetector insiderThreatDetector;
 
     // Insert a new brute force detection rule into the database
-    private void insertInsiderThreatRule(Connection conn) {
+    public void insertInsiderThreatRule(Connection conn) {
         String sql = "INSERT INTO insider_threat_rules (access_threshold, time_window_sec) VALUES (?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, insiderThreatDetector.getInsiderPacketThreshold());
@@ -24,7 +24,7 @@ public class InsiderThreatDao {
     }
 
     // Load the brute force detection thresholds from the database
-    private void loadInsiderThreatDetector(Connection conn) {
+    public void loadInsiderThreatDetector(Connection conn) {
         String sql = "SELECT access_threshold, time_window_sec FROM insider_threat_rules ";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -41,7 +41,7 @@ public class InsiderThreatDao {
     }
 
     // update threshold
-    private void updateInsiderPacketThreshold(Connection conn, int newPacketThreshold, int id) {
+    public void updateInsiderPacketThreshold(Connection conn, int newPacketThreshold, int id) {
         String sql = "UPDATE insider_threat_rules SET access_threshold = ? WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, newPacketThreshold);
@@ -54,7 +54,7 @@ public class InsiderThreatDao {
     }
 
     // update time window
-    private void updateInsiderTimeWindow(Connection conn, int newTimeWindow, int id) {
+    public void updateInsiderTimeWindow(Connection conn, int newTimeWindow, int id) {
         String sql = "UPDATE insider_threat_rules SET time_window_sec = ? WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, newTimeWindow);
@@ -68,7 +68,7 @@ public class InsiderThreatDao {
 
 
     // delete
-    private void deleteInsiderThreatRule(Connection conn, int id) {
+    public void deleteInsiderThreatRule(Connection conn, int id) {
         String sql = "DELETE FROM insider_threat_rules WHERE id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
