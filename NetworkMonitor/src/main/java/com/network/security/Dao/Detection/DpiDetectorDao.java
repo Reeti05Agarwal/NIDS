@@ -4,9 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
 import com.network.security.Intrusion_detection.BruteForceDetector;
 
-public class BruteForceDao {
+public class DpiDetector {
     private BruteForceDetector bruteForceDetector;
 
     // Insert a new brute force detection rule into the database

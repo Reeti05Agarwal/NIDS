@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.Map;
-
 import com.network.security.util.MYSQLconnection;
 
 //import com.network.security.services.PacketPipelineService;
@@ -16,17 +15,6 @@ public class PacketDao{
     private static final String DB_URL = "jdbc:mysql://localhost:3306/network";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "Maria@mysql05";
-
-    // public static Properties loadConfig(String filePath) {
-    //     Properties properties = new Properties();
-    //     try (FileInputStream input = new FileInputStream(filePath)) {
-    //         properties.load(input);
-    //     } catch (IOException e) {
-    //         System.err.println("[ERROR] Could not load config file: " + filePath);
-    //         e.printStackTrace();
-    //     }
-    //     return properties;
-    // }
 
     MYSQLconnection mysqlConnection = new MYSQLconnection();
     //Properties properties = mysqlConnection.loadConfig("src/main/resources/config.properties");

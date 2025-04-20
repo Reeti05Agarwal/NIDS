@@ -1,16 +1,31 @@
 package com.network.security.Intrusion_detection;
 
 public class BruteForceDetector {
-    private int BrutePacketThreshold;
-    private int BruteTimeWindow;
+    private int brutePacketThreshold;
+    private int bruteTimeWindow;
 
-    public BruteForceDetector(int BrutePacketThreshold, int BruteTimeWindow) {
-        this.BrutePacketThreshold = BrutePacketThreshold;
-        this.BruteTimeWindow = BruteTimeWindow;
+    public BruteForceDetector(int brutePacketThreshold, int bruteTimeWindow) {
+        this.brutePacketThreshold = brutePacketThreshold;
+        this.bruteTimeWindow = bruteTimeWindow;
     }
 
+    // Getters and Setters
+    public int getBrutePacketThreshold() {
+        return brutePacketThreshold;
+    }
+    public void setBrutePacketThreshold(int brutePacketThreshold) {
+        this.brutePacketThreshold = brutePacketThreshold;
+    }
+    public int getBruteTimeWindow() {
+        return bruteTimeWindow;
+    }
+    public void setBruteTimeWindow(int bruteTimeWindow) {
+        this.bruteTimeWindow = bruteTimeWindow;
+    }
+
+    // Method to detect brute force attacks based on packet count and time window
     public boolean detect(int packetCount, int secondsElapsed) {
-        if (packetCount > BrutePacketThreshold && secondsElapsed <= BruteTimeWindow) {
+        if (packetCount > brutePacketThreshold && secondsElapsed <= bruteTimeWindow) {
             System.out.println("Brute force attack detected.");
             return true;
         }

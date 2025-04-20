@@ -1,20 +1,35 @@
 package com.network.security.Intrusion_detection;
 
 public class InsiderThreatDetector {
-    private int InsiderePacketThreshold;
-    private int InsiderTimeWindow;
+    private int insiderPacketThreshold;
+    private int insiderTimeWindow;
 
-    public InsiderThreatDetector(int InsiderePacketThreshold, int InsiderTimeWindow) {
-        this.InsiderePacketThreshold = InsiderePacketThreshold;
-        this.InsiderTimeWindow = InsiderTimeWindow;
+    public InsiderThreatDetector(int insiderPacketThreshold, int insiderTimeWindow) {
+        this.insiderPacketThreshold = insiderPacketThreshold;
+        this.insiderTimeWindow = insiderTimeWindow;
+    }
+
+    public int getInsiderPacketThreshold() {
+        return insiderPacketThreshold;
+    }
+
+    public void setInsiderPacketThreshold(int insiderPacketThreshold) {
+        this.insiderPacketThreshold = insiderPacketThreshold;
+    }
+
+    public int getInsiderTimeWindow() {
+        return insiderTimeWindow;
+    }
+
+    public void setInsiderTimeWindow(int insiderTimeWindow) {
+        this.insiderTimeWindow = insiderTimeWindow;
     }
 
     public boolean detect(String service, int failedAttemptsCounts, int seconds) {
-        if (service.equalsIgnoreCase(service) &&
-            failedAttemptsCounts > InsiderePacketThreshold && seconds <= InsiderTimeWindow) {
+        if (failedAttemptsCounts > insiderPacketThreshold && seconds <= insiderTimeWindow) {
             System.out.println("Insider threat detected on service: " + service);
             return true;
-        }        
+        }
         return false;
     }
 }

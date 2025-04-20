@@ -1,8 +1,8 @@
-package com.network.security.dao;
+package com.network.security.Dao;
 
 import com.network.security.entity.User;
 import com.network.security.entity.Role;
-
+import com.network.security.util.MYSQLconnection;
 import java.sql.*;
 import java.util.Map;
 
@@ -15,15 +15,12 @@ import java.util.Map;
  */
 
 public class UserDao {
-    /*
-     * set DB_URL=jdbc:mysql://localhost:3306/my_database
-        set DB_USER=app_user
-        set DB_PASSWORD=secretpass
 
-     */
     String DB_URL = System.getenv("DB_URL");
     String DB_USER = System.getenv("DB_USER");
     String DB_PASSWORD = System.getenv("DB_PASSWORD");
+
+    MYSQLconnection mysqlConnection = new MYSQLconnection();
     
     private final Connection connection;
 

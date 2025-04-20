@@ -1,21 +1,35 @@
 package com.network.security.Intrusion_detection;
 
 public class DoSDetector {
-    private int DoSPacketThreshold;
-    private int DoSTimeWindow;
+    private int dosPacketThreshold;
+    private int dosTimeWindow;
 
-    public DoSDetector(int DoSPacketThreshold, int DoSTimeWindow) {
-        this.DoSPacketThreshold = DoSPacketThreshold;
-        this.DoSTimeWindow = DoSTimeWindow;
+    public DoSDetector(int dosPacketThreshold, int dosTimeWindow) {
+        this.dosPacketThreshold = dosPacketThreshold;
+        this.dosTimeWindow = dosTimeWindow;
     }
 
     public boolean detect(int packetCount, int secondsElapsed) {
-        if (packetCount > DoSPacketThreshold && secondsElapsed <= DoSTimeWindow) {
+        if (packetCount > dosPacketThreshold && secondsElapsed <= dosTimeWindow) {
             System.out.println("DDoS attack detected.");
             return true;
         }
         return false;
     }
 
-    // getters and setters for packetThreshold and timeWindow
+    public int getDosPacketThreshold() {
+        return dosPacketThreshold;
+    }
+
+    public void setDosPacketThreshold(int dosPacketThreshold) {
+        this.dosPacketThreshold = dosPacketThreshold;
+    }
+
+    public int getDosTimeWindow() {
+        return dosTimeWindow;
+    }
+
+    public void setDosTimeWindow(int dosTimeWindow) {
+        this.dosTimeWindow = dosTimeWindow;
+    }
 }
