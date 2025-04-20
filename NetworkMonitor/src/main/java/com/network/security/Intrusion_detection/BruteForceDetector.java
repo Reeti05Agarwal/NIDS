@@ -1,26 +1,18 @@
 package com.network.security.Intrusion_detection;
 
-import java.util.List;
-import java.util.Map;
-
 public class BruteForceDetector {
-    private List<Map<String, Object>> rules;
+    private int BrutePacketThreshold;
+    private int BruteTimeWindow;
 
-    public BruteForceDetector(List<Map<String, Object>> rules) {
-        this.rules = rules;
+    public BruteForceDetector(int BrutePacketThreshold, int BruteTimeWindow) {
+        this.BrutePacketThreshold = BrutePacketThreshold;
+        this.BruteTimeWindow = BruteTimeWindow;
     }
 
-    public boolean detect(String service, int failedAttempts, int seconds) {
-        for (Map<String, Object> rule : rules) {
-            String ruleService = (String) rule.get("service");
-            int threshold = (int) rule.get("failed_attempt_threshold");
-            int timeWindow = (int) rule.get("time_window_sec");
-
-            if (ruleService.equalsIgnoreCase(service) &&
-                failedAttempts > threshold && seconds <= timeWindow) {
-                System.out.println("Brute force detected on service: " + service);
-                return true;
-            }
+    public boolean detect(int packetCount, int secondsElapsed) {
+        if (packetCount > BrutePacketThreshold && secondsElapsed <= BruteTimeWindow) {
+            System.out.println("Brute force attack detected.");
+            return true;
         }
         return false;
     }

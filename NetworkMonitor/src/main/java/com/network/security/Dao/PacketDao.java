@@ -1,8 +1,5 @@
 package com.network.security.Dao;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-// import java.io.InputStream;
+ 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -10,7 +7,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.Properties;
+
+import com.network.security.util.MYSQLconnection;
 
 //import com.network.security.services.PacketPipelineService;
 
@@ -19,16 +17,19 @@ public class PacketDao{
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "Maria@mysql05";
 
-    public static Properties loadConfig(String filePath) {
-        Properties properties = new Properties();
-        try (FileInputStream input = new FileInputStream(filePath)) {
-            properties.load(input);
-        } catch (IOException e) {
-            System.err.println("[ERROR] Could not load config file: " + filePath);
-            e.printStackTrace();
-        }
-        return properties;
-    }
+    // public static Properties loadConfig(String filePath) {
+    //     Properties properties = new Properties();
+    //     try (FileInputStream input = new FileInputStream(filePath)) {
+    //         properties.load(input);
+    //     } catch (IOException e) {
+    //         System.err.println("[ERROR] Could not load config file: " + filePath);
+    //         e.printStackTrace();
+    //     }
+    //     return properties;
+    // }
+
+    MYSQLconnection mysqlConnection = new MYSQLconnection();
+    //Properties properties = mysqlConnection.loadConfig("src/main/resources/config.properties");
 
     private static void insertLayer(Connection conn, String query, Object... params) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(query)) {

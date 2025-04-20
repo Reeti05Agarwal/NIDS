@@ -32,7 +32,6 @@ import com.network.security.PacketSniffing.PacketSnifferService;
  * 2. packetParserBuffer -> StoringPacketQueue (BlockingQueue<Map<String, Object>>)
  * 
  * THINGS TO DO:
- * 1. Gracefull stop of execution
  * 2. InterruptedException Should Be Handled Properly
  * 3. Add error handling.
  * 4. Potential Memory Leak with Threads

@@ -1,27 +1,20 @@
 package com.network.security.Intrusion_detection;
 
-import java.util.List;
-import java.util.Map;
-
 public class InsiderThreatDetector {
-    private List<Map<String, Object>> rules;
+    private int InsiderePacketThreshold;
+    private int InsiderTimeWindow;
 
-    public InsiderThreatDetector(List<Map<String, Object>> rules) {
-        this.rules = rules;
+    public InsiderThreatDetector(int InsiderePacketThreshold, int InsiderTimeWindow) {
+        this.InsiderePacketThreshold = InsiderePacketThreshold;
+        this.InsiderTimeWindow = InsiderTimeWindow;
     }
 
-    public boolean detect(String ruleType, int accessCount, int timeElapsed) {
-        for (Map<String, Object> rule : rules) {
-            String rType = (String) rule.get("rule_type");
-            int threshold = (int) rule.get("access_threshold");
-            int timeWindow = (int) rule.get("time_window_sec");
-
-            if (rType.equalsIgnoreCase(ruleType) &&
-                accessCount > threshold && timeElapsed <= timeWindow) {
-                System.out.println("Insider threat detected: " + rule.get("rule_name"));
-                return true;
-            }
-        }
+    public boolean detect(String service, int failedAttemptsCounts, int seconds) {
+        if (service.equalsIgnoreCase(service) &&
+            failedAttemptsCounts > InsiderePacketThreshold && seconds <= InsiderTimeWindow) {
+            System.out.println("Insider threat detected on service: " + service);
+            return true;
+        }        
         return false;
     }
 }

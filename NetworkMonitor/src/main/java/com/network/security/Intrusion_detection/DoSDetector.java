@@ -1,21 +1,21 @@
 package com.network.security.Intrusion_detection;
 
-import java.util.Map;
-
 public class DoSDetector {
-    private int packetThreshold;
-    private int timeWindow;
+    private int DoSPacketThreshold;
+    private int DoSTimeWindow;
 
-    public DoSDetector(Map<String, Object> ddosRule) {
-        this.packetThreshold = (int) ddosRule.get("packet_threshold");
-        this.timeWindow = (int) ddosRule.get("time_window_sec");
+    public DoSDetector(int DoSPacketThreshold, int DoSTimeWindow) {
+        this.DoSPacketThreshold = DoSPacketThreshold;
+        this.DoSTimeWindow = DoSTimeWindow;
     }
 
     public boolean detect(int packetCount, int secondsElapsed) {
-        if (packetCount > packetThreshold && secondsElapsed <= timeWindow) {
+        if (packetCount > DoSPacketThreshold && secondsElapsed <= DoSTimeWindow) {
             System.out.println("DDoS attack detected.");
             return true;
         }
         return false;
     }
+
+    // getters and setters for packetThreshold and timeWindow
 }

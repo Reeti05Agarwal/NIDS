@@ -21,10 +21,10 @@ public class DetectionDao {
     }
 
     // Threshold-based rule data
-    private final Map<String, Integer> thresholdMap = new ConcurrentHashMap<>();
-    private final Map<String, Integer> timeWindowMap = new ConcurrentHashMap<>();
+    protected final Map<String, Integer> thresholdMap = new ConcurrentHashMap<>();
+    protected final Map<String, Integer> timeWindowMap = new ConcurrentHashMap<>();
     // Pattern-based rule data (rule name -> set of matching values)
-    private final Map<String, Set<String>> patternMap = new ConcurrentHashMap<>();
+    protected final Map<String, Set<String>> patternMap = new ConcurrentHashMap<>();
 
     // Load all rule types
     public void loadAllRules(Connection conn) {
@@ -93,28 +93,5 @@ public class DetectionDao {
         }
     }
 
-    // Getter APIs
-    public Integer getThreshold(String ruleName) {
-        return thresholdMap.get(ruleName);
-    }
-
-    public Integer getTimeWindow(String ruleName) {
-        return timeWindowMap.get(ruleName);
-    }
-
-    public Set<String> getPatterns(String ruleName) {
-        return patternMap.getOrDefault(ruleName, Collections.emptySet());
-    }
-
-    public void debugPrintAll() {
-        System.out.println("=== Threshold Rules ===");
-        for (String rule : thresholdMap.keySet()) {
-            System.out.println(rule + ": " + thresholdMap.get(rule) + " in " + timeWindowMap.get(rule) + " sec");
-        }
-
-        System.out.println("\n=== Pattern Rules ===");
-        for (String rule : patternMap.keySet()) {
-            System.out.println(rule + ": " + patternMap.get(rule));
-        }
-    }
+    
 }

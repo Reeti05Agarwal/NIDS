@@ -1,26 +1,20 @@
 package com.network.security.Intrusion_detection;
 
-import java.util.List;
-import java.util.Map;
-
 public class DNSWebFilterDetector {
-    private List<Map<String, Object>> rules;
+    private String DNSWebFilterPattern;
+    private int DNSWebFilterThreshold;
+    private int DNSWebFilterTimeWindow;
 
-    public DNSWebFilterDetector(List<Map<String, Object>> rules) {
-        this.rules = rules;
+    public DNSWebFilterDetector(String DNSWebFilterPattern, int DNSWebFilterThreshold, int DNSWebFilterTimeWindow) {
+        this.DNSWebFilterPattern = DNSWebFilterPattern;
+        this.DNSWebFilterThreshold = DNSWebFilterThreshold;
+        this.DNSWebFilterTimeWindow = DNSWebFilterTimeWindow;
     }
 
-    public boolean detect(String pattern, int occurrences, int seconds) {
-        for (Map<String, Object> rule : rules) {
-            String rulePattern = (String) rule.get("pattern");
-            int threshold = (int) rule.get("threshold");
-            int timeWindow = (int) rule.get("time_window_seconds");
-
-            if (rulePattern.equalsIgnoreCase(pattern) &&
-                occurrences > threshold && seconds <= timeWindow) {
-                System.out.println("DNS filtering triggered for pattern: " + pattern);
-                return true;
-            }
+    public boolean detect(String dnsQuery, int queryCount, int secondsElapsed) {
+        if (dnsQuery.contains(DNSWebFilterPattern) && queryCount > DNSWebFilterThreshold && secondsElapsed <= DNSWebFilterTimeWindow) {
+            System.out.println("DNS Web Filter attack detected.");
+            return true;
         }
         return false;
     }

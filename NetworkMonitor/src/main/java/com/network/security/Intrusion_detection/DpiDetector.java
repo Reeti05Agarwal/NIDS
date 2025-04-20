@@ -1,24 +1,16 @@
 package com.network.security.Intrusion_detection;
 
-import java.util.List;
-import java.util.Map;
-
 public class DpiDetector {
-    private List<Map<String, Object>> rules;
+    private String keyword; 
 
-    public DpiDetector(List<Map<String, Object>> rules) {
-        this.rules = rules;
+    public DpiDetector(String keyword) {
+        this.keyword = keyword.toLowerCase();
     }
 
-    public boolean detect(String ruleName, int payloadLength) {
-        for (Map<String, Object> rule : rules) {
-            String name = (String) rule.get("rule_name");
-            int threshold = (int) rule.get("payload_length_threshold");
-
-            if (name.equalsIgnoreCase(ruleName) && payloadLength > threshold) {
-                System.out.println("DPI violation detected: " + ruleName);
-                return true;
-            }
+    public boolean detect(String content) {
+        if (content != null && content.toLowerCase().contains(keyword)) {
+            System.out.println("DPI violation detected: " );
+            return true;
         }
         return false;
     }
