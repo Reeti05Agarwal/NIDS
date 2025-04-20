@@ -11,6 +11,16 @@ public class ExtICMPDao {
     private ExtICMPDetection extICMPDetection;
 
     // Insert a new brute force detection rule into the database
+    private void insertExtICMPDetection(Connection conn) {
+        String sql = "INSERT INTO external_icmp_block (source_ip) VALUES (?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, extICMPDetection.getExticmpIPAddress());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to insert brute force detection rule");
+            e.printStackTrace();
+        }
+    }
 
     // Load the brute force detection thresholds from the database
     private void loadBruteForceThresholds(Connection conn) {
@@ -29,7 +39,28 @@ public class ExtICMPDao {
     }
 
     // update 
+    private void updateExtICMPDetection(Connection conn, String newIPAddress, int id) {
+        String sql = "UPDATE external_icmp_block SET source_ip = ? WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, newIPAddress);
+            stmt.setInt(2, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to update brute force detection rule");
+            e.printStackTrace();
+        }
+    }
 
 
     // delete
+    private void deleteExtICMPDetection(Connection conn, int id) {
+        String sql = "DELETE FROM external_icmp_block WHERE id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to delete brute force detection rule");
+            e.printStackTrace();
+        }
+    }
 }

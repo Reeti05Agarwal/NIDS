@@ -11,6 +11,16 @@ public class DpiDetectorDao {
     private DpiDetector dpiDetector;
 
     // Insert a new brute force detection rule into the database
+    private void insertDpiDetector(Connection conn) {
+        String sql = "INSERT INTO dpi_keywords (keyword) VALUES (?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, dpiDetector.getKeyword());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to insert DPI detection rule");
+            e.printStackTrace();
+        }
+    }
 
     // Load the brute force detection thresholds from the database
     private void loadDpiDetector(Connection conn) {
