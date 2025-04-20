@@ -2,28 +2,13 @@ package com.network.security.Dao;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.Properties;
-
-/*
- * UI
- * 
- * 
- * Detections:
- * 
- * 
- */
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DetectionDao {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/network";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "Maria@mysql05";
 
+    // Configuration loader
     public static Properties loadConfig(String filePath) {
         Properties properties = new Properties();
         try (FileInputStream input = new FileInputStream(filePath)) {
@@ -33,72 +18,103 @@ public class DetectionDao {
             e.printStackTrace();
         }
         return properties;
-    } 
-
-    public static void restrictedProtocols(Map<String, Object> data) {
-    if (data.isEmpty()) {
-        System.err.println("[ERROR] Skipping invalid packet...");
-        return;
     }
 
-    try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-        String selectQuery = "SELECT PROTOCOLNAME FROM RESTRICTED_PROTOCOLS WHERE PROTOCOLNAME = ?";
-        PreparedStatement stmt = conn.prepareStatement(selectQuery);
-        stmt.setString(1, (String) data.get("PROTOCOLNAME"));
-        
-        ResultSet rs = stmt.executeQuery();
-        
-        if (rs.next()) {
-            // Protocol is restricted
-            System.out.println("[ALERT] Restricted protocol detected: " + rs.getString("PROTOCOLNAME"));
-            // You can take action here, like logging, alerting, or dropping the packet.
-        }
-        
-        rs.close();
-        stmt.close();
-    } catch (SQLException e) {
-        e.printStackTrace();
+    // Threshold-based rule data
+    private final Map<String, Integer> thresholdMap = new ConcurrentHashMap<>();
+    private final Map<String, Integer> timeWindowMap = new ConcurrentHashMap<>();
+    // Pattern-based rule data (rule name -> set of matching values)
+    private final Map<String, Set<String>> patternMap = new ConcurrentHashMap<>();
+
+    // Load all rule types
+    public void loadAllRules(Connection conn) {
+        loadBruteForceThresholds(conn);
+        loadBlacklistedDomains(conn);
+        loadSuspiciousUserAgents(conn);
+        // Add more loaders here
     }
-}
 
+    // Threshold-based loader for brute force 
+    private void loadBruteForceThresholds(Connection conn) {
+        String sql = "SELECT rule_name, failed_attempt_threshold, time_window_sec FROM view_brute_force_rules";
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
+            while (rs.next()) {
+                String rule = rs.getString("rule_name");
+                int threshold = rs.getInt("failed_attempt_threshold");
+                int window = rs.getInt("time_window_sec");
 
+                thresholdMap.put(rule, threshold);
+                timeWindowMap.put(rule, window);
+            }
 
-    static void EdittingThreshold(Map<String, Object> threshold) {
-        if (threshold.isEmpty()) {
-            System.err.println("[ERROR] Skipping invalid packet...");
-            return;
-        }
-
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            // Super Table: Packet Metadata
-            String updateQuery_threshold = "INSERT INTO User (Username, Password, Role) VALUES (?, ?, ?)"; 
-            PreparedStatement stmt_threshold = conn.prepareStatement(updateQuery_threshold);
-            
         } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to load brute force thresholds");
             e.printStackTrace();
         }
     }
 
-    static void GetDetection(Map<String, Object> DetectionData) {
-        if (DetectionData.isEmpty()) {
-            System.err.println("[ERROR] Skipping invalid packet...");
-            return;
-        }
+    // blacklisted domains 
+    private void loadBlacklistedDomains(Connection conn) {
+        String sql = "SELECT rule_name, domain FROM view_block_blacklisted_domains"; // this view must exist
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
-            // Super Table: Packet Metadata
-            String updateQuery_threshold = "SELECT INTO User (ID, DETECTION_NAME, DESCRIPTION, THRESHOLD, UPDATE_DATE) VALUES (?, ?, ?, ?, ?)"; 
-            PreparedStatement stmt_threshold = conn.prepareStatement(updateQuery_threshold);
-            stmt_threshold.setInt(1, (Integer) DetectionData.get("ID"));
-             
-             
+            while (rs.next()) {
+                String rule = rs.getString("rule_name");
+                String domain = rs.getString("domain");
+
+                patternMap.computeIfAbsent(rule, k -> new HashSet<>()).add(domain);
+            }
+
         } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to load blacklisted domains");
             e.printStackTrace();
         }
     }
 
+    //suspicious user agents 
+    private void loadSuspiciousUserAgents(Connection conn) {
+        String sql = "SELECT rule_name, user_agent FROM view_detect_suspicious_user_agents"; // another view
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
+            while (rs.next()) {
+                String rule = rs.getString("rule_name");
+                String userAgent = rs.getString("user_agent");
 
+                patternMap.computeIfAbsent(rule, k -> new HashSet<>()).add(userAgent);
+            }
 
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to load suspicious user agents");
+            e.printStackTrace();
+        }
+    }
+
+    // Getter APIs
+    public Integer getThreshold(String ruleName) {
+        return thresholdMap.get(ruleName);
+    }
+
+    public Integer getTimeWindow(String ruleName) {
+        return timeWindowMap.get(ruleName);
+    }
+
+    public Set<String> getPatterns(String ruleName) {
+        return patternMap.getOrDefault(ruleName, Collections.emptySet());
+    }
+
+    public void debugPrintAll() {
+        System.out.println("=== Threshold Rules ===");
+        for (String rule : thresholdMap.keySet()) {
+            System.out.println(rule + ": " + thresholdMap.get(rule) + " in " + timeWindowMap.get(rule) + " sec");
+        }
+
+        System.out.println("\n=== Pattern Rules ===");
+        for (String rule : patternMap.keySet()) {
+            System.out.println(rule + ": " + patternMap.get(rule));
+        }
+    }
 }

@@ -1,23 +1,27 @@
 package com.network.security.Intrusion_detection;
 
+import java.util.List;
+import java.util.Map;
+
 public class InsiderThreatDetector {
-    /* 
-    THIS WILL ALL GO IN THE MYSQL TABLES
+    private List<Map<String, Object>> rules;
 
-    // Insider Threat Detection
-    
-    //Lateral Movement Detection
-    public static final int LATERAL_MOVEMENT_THRESHOLD = 100; // Example threshold for lateral movement detection
-    public static final int LATERAL_MOVEMENT_TIMEOUT = 1000; // Example timeout for lateral movement detection
+    public InsiderThreatDetector(List<Map<String, Object>> rules) {
+        this.rules = rules;
+    }
 
-    // Data Exfiltration Detection
-    public static final int DATA_EXFILTRATION_THRESHOLD = 100; // Example threshold for data exfiltration detection
-    public static final int DATA_EXFILTRATION_TIMEOUT = 1000; // Example timeout for data exfiltration detection
-    public static final int DATA_EXFILTRATION_INTERVAL = 1000; // Example interval for data exfiltration detection
+    public boolean detect(String ruleType, int accessCount, int timeElapsed) {
+        for (Map<String, Object> rule : rules) {
+            String rType = (String) rule.get("rule_type");
+            int threshold = (int) rule.get("access_threshold");
+            int timeWindow = (int) rule.get("time_window_sec");
 
-    // Privilege Escalation Detection
-    public static final int PRIVILEGE_ESCALATION_THRESHOLD = 100; // Example threshold for privilege escalation detection
-    public static final int PRIVILEGE_ESCALATION_TIMEOUT = 1000; // Example timeout for privilege escalation detection
-    */
-    
+            if (rType.equalsIgnoreCase(ruleType) &&
+                accessCount > threshold && timeElapsed <= timeWindow) {
+                System.out.println("Insider threat detected: " + rule.get("rule_name"));
+                return true;
+            }
+        }
+        return false;
+    }
 }

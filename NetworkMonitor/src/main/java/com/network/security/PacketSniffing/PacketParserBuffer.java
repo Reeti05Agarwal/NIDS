@@ -300,10 +300,6 @@ public class PacketParserBuffer {
         if (buffer.capacity() < offset + 20) return;
 
         buffer.position(offset);
-        //int srcPort = buffer.getShort() & 0xFFFF;
-        //int destPort = buffer.getShort() & 0xFFFF;
-        //packetData.put("TCP_SRC_PORT", srcPort);
-        //packetData.put("TCP_DEST_PORT", destPort);
         long sequenceNum = buffer.getInt() & 0xFFFFFFFFL;
         long ackNum = buffer.getInt() & 0xFFFFFFFFL;
         int dataOffset = ((buffer.get() & 0xFF) >> 4) * 4; // data offset (header length in bytes)
@@ -313,17 +309,16 @@ public class PacketParserBuffer {
         
         packetData.put("SEQUENCE_NUM", sequenceNum);
         packetData.put("ACK_NUM", ackNum);
-        //packetData.put("TCP_HEADER_LENGTH", dataOffset);
         packetData.put("TCP_FLAGS", PacketUtils.parseTCPFlags(flags));
         packetData.put("WINDOW_SIZE", windowSize);
         packetData.put("TCP_CHECKSUM", checksum);
          
 
-        // if (dataOffset > 20) {
-        //     byte[] options = new byte[dataOffset - 20];
-        //     buffer.get(options);
-        //     packetData.put("TCP_OPTIONS", options);
-        // }
+        if (dataOffset > 20) {
+            byte[] options = new byte[dataOffset - 20];
+            buffer.get(options);
+            packetData.put("TCP_OPTIONS", options);
+        }
     
         // Check if there's a TCP payload (application data)
         if (buffer.remaining() > 0) {
