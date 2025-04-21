@@ -22,7 +22,6 @@ public class BruteForceService {
 
 
     private Map<String, List<Long>> packetTimestamps = new HashMap<>();
-    MYSQLconnection mysqlConnection;
     Connection conn = MYSQLconnection.getConnection();
 
     public void loadBruteForce(Map<String, Object> packetInfo) {

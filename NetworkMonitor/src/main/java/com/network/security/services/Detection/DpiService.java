@@ -12,9 +12,7 @@ public class DpiService {
     private DpiDetectorDao dpiDetectorDao;
     private DpiDetector dpiDetector;
     AlertService alertService = new AlertService(); 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BruteForceService.class); 
-
-    MYSQLconnection mysqlConnection;
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BruteForceService.class);  
     Connection conn = MYSQLconnection.getConnection();
 
     // Add a new DPI detection keyword

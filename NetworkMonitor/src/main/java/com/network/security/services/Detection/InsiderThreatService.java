@@ -8,9 +8,7 @@ import com.network.security.Intrusion_detection.InsiderThreatDetector;
 
 public class InsiderThreatService {
     private InsiderThreatDao insiderThreatDao;
-    private InsiderThreatDetector insiderThreatDetector;
-
-    MYSQLconnection mysqlConnection;
+    private InsiderThreatDetector insiderThreatDetector; 
     Connection conn = MYSQLconnection.getConnection();
 
     public void loadInsiderThreat() {

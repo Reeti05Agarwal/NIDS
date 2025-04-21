@@ -14,8 +14,6 @@ public class DNSWebFilterService {
     private DNSWebFilterDetector dnsWebFilterDetector;
     private AlertService alertService = new AlertService(); // Assuming you have an AlertService class for alerting
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DNSWebFilterService.class);
-
-    MYSQLconnection mysqlConnection;
     Connection conn = MYSQLconnection.getConnection();
  
     // Load DNS Web Filter rules from the database and set them in the detector

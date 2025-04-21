@@ -20,7 +20,6 @@ import com.network.security.Dao.PacketDao;
 import com.network.security.Dao.PacketRetrieverDao;
 import com.network.security.PacketSniffing.PacketParserBuffer;
 import com.network.security.PacketSniffing.PacketSnifferService;
-//import com.network.security.util.PacketTracker;
 
 import com.network.security.services.Detection.BruteForceService;
 import com.network.security.services.Detection.DNSWebFilterService;
@@ -28,7 +27,6 @@ import com.network.security.services.Detection.DosService;
 import com.network.security.services.Detection.DpiService;
 import com.network.security.services.Detection.ExtICMPService;
 import com.network.security.services.Detection.SusUserAgentService;
-//import com.network.security.services.Detection.InsiderThreatService;
 //import com.network.security.services.Detection.MalwareService;
 
 
@@ -188,7 +186,9 @@ class PacketRetriever implements Runnable {
                 // simulate polling every 5 seconds, or poll only unprocessed packets
                 long latestPacketID = PacketRetrieverDao.getLatestPacketID(); // Loading latest packet ID
                 Map<String, Object> packetInfo = PacketRetrieverDao.getPacketData(latestPacketID); // Loading packet data
-                
+                System.out.println("[RETRIEVER] Fetching packet with ID: " + latestPacketID);
+                LOGGER.info("[RETRIEVER] Fetching packet with ID: " + latestPacketID);
+
                 for (Map.Entry<String, Object> packet : packetInfo.entrySet()) {
                     Map<String, Object> singlePacketMap = Map.of(packet.getKey(), packet.getValue());
                     detectionQueue.put(singlePacketMap);
@@ -225,7 +225,6 @@ class DetectionDispatcher implements Runnable {
     private final DosService dosService = new DosService();
     private final DpiService dpiService = new DpiService();
     private final ExtICMPService extICMPService = new ExtICMPService();
-    //private final InsiderThreatService insiderThreatService = new InsiderThreatService();
     //private final MalwareService malwareService = new MalwareService();
     private final SusUserAgentService susUserAgentService = new SusUserAgentService();
 
@@ -239,13 +238,14 @@ class DetectionDispatcher implements Runnable {
         try {
             while (PacketPipelineService.running) {
                 Map<String, Object> packetData = detectionQueue.take();
+                System.out.println("[DETECTOR] Retrieved packet from queue: " + packetData);
+                LOGGER.info("[DETECTOR] Retrieved packet from queue: " + packetData);
 
                 detectionServicePool.submit(() -> bruteForceService.loadBruteForce(packetData));
                 detectionServicePool.submit(() -> dnsWebFilterService.loadDnsWebFilterRules(packetData));
                 detectionServicePool.submit(() -> dosService.loadDosService(packetData));
                 detectionServicePool.submit(() -> dpiService.loadDpiDetectorKeywords(packetData));
                 detectionServicePool.submit(() -> extICMPService.loadICMPRules(packetData));
-                //detectionServicePool.submit(() -> insiderThreatService.loadInsiderThreat(packetData));
                 //detectionServicePool.submit(() -> malwareService.loadMalwareSig(packetData));
                 detectionServicePool.submit(() -> susUserAgentService.loadSuspiciousUserAgent(packetData));
 

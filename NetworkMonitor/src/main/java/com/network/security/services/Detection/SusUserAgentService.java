@@ -12,8 +12,7 @@ public class SusUserAgentService {
     SuspiciousUserAgentDetection susUserAgentDetection;
     SuspiciousUserAgentDao susUserAgentDao;
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SusUserAgentService.class);
-    AlertService alertService = new AlertService();
-    MYSQLconnection mysqlConnection;
+    AlertService alertService = new AlertService(); 
     Connection conn = MYSQLconnection.getConnection();
 
     public void loadSuspiciousUserAgent(Map<String, Object> packetInfo) {

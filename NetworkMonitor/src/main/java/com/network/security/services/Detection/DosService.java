@@ -1,12 +1,9 @@
 package com.network.security.services.Detection;
 
 import com.network.security.Dao.Detection.DoSDetectorDao;
-import com.network.security.Intrusion_detection.DoSDetector;
-
-import com.network.security.Dao.PacketRetrieverDao;
+import com.network.security.Intrusion_detection.DoSDetector; 
 import com.network.security.util.MYSQLconnection;
 import com.network.security.util.PacketTracker;
-import com.network.security.util.PacketUtils;
 import com.network.security.services.AlertService; // Assuming you have an AlertService class for alerting
 
 import java.sql.Connection;
@@ -17,10 +14,7 @@ public class DosService {
     private DoSDetectorDao doSDetectorDao;
     private DoSDetector doSDetector;
     AlertService alertService = new AlertService(); // Assuming you have an AlertService class for alerting
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DosService.class);
-
-
-    MYSQLconnection mysqlConnection;
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DosService.class); 
     Connection conn = MYSQLconnection.getConnection();
 
     // Load rule from DB and update doSDetector object

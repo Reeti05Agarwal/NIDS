@@ -3,17 +3,13 @@ package com.network.security.Dao;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
+import com.network.security.util.MYSQLconnection;
 
 public class PacketRetrieverDao {
-
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/network";
-    private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "Maria@mysql05";
-
     public static Map<String, Object> getPacketData(long packetID) {
         Map<String, Object> packetData = new HashMap<>();
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+        try (Connection conn = MYSQLconnection.getConnection()) {
 
             // Packet Metadata
             try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Packet_Metadata WHERE PacketID = ?")) {
@@ -78,7 +74,7 @@ public class PacketRetrieverDao {
 
     // Optionally, fetch the latest PacketID
     public static long getLatestPacketID() {
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        try (Connection conn = MYSQLconnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT MAX(PacketID) AS maxID FROM Packet_Metadata")) {
             if (rs.next()) {

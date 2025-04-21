@@ -4,9 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.LinkedHashMap;
-import java.util.Map;
-
-import com.network.security.util.DBConnection;
+import java.util.Map; 
+import com.network.security.util.MYSQLconnection;
 
 /**
  * Simple aggregates that feed MainFrame charts – Java‑14‑friendly.
@@ -46,7 +45,7 @@ public class AnalyticsDao {
     /* ---------- private helper ---------------------------------------- */
     private Map<String, Integer> queryToMap(String sql, int limit) throws Exception {
         Map<String, Integer> map = new LinkedHashMap<>();
-        try (Connection c = DBConnection.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
+        try (Connection c = MYSQLconnection.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
 
             ps.setInt(1, limit);
             try (ResultSet rs = ps.executeQuery()) {

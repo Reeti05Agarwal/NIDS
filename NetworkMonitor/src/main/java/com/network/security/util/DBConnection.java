@@ -1,42 +1,39 @@
 package com.network.security.util;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class DBConnection {
 
-    private static final Properties cfg = new Properties();
+    private static final String CONFIG_FILE_PATH = "NetworkMonitor/src/main/resources/configs/config.properties";  // Update path as needed
 
-    static {
-        // Load config.properties from classpath
-        try (InputStream in = DBConnection.class
-                .getClassLoader()
-                .getResourceAsStream("config.properties")) {
-            if (in == null) {
-                throw new IOException("config.properties not found on classpath");
-            }
-            cfg.load(in);
-
-            // Register the JDBC driver
-            String driver = cfg.getProperty("db.driver");
-            if (driver == null || driver.isBlank()) {
-                throw new IllegalStateException("db.driver not set in config.properties");
-            }
-            Class.forName(driver);
-
-        } catch (IOException | ClassNotFoundException | IllegalStateException e) {
-            throw new ExceptionInInitializerError("Failed to load DB config: " + e.getMessage());
+    public static Properties loadConfig() {
+        Properties properties = new Properties();
+        try (FileInputStream input = new FileInputStream(CONFIG_FILE_PATH)) {
+            properties.load(input);
+        } catch (IOException e) {
+            System.err.println("[ERROR] Could not load config file: " + CONFIG_FILE_PATH);
+            e.printStackTrace();
         }
+        return properties;
     }
 
-    public static Connection getConnection() throws Exception {
-        return DriverManager.getConnection(
-                cfg.getProperty("db.url"),
-                cfg.getProperty("db.user"),
-                cfg.getProperty("db.password")
-        );
+    public static Connection getConnection() {
+        Properties config = loadConfig();  // ✅ Now it's declared
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            String dbUrl = config.getProperty("db.url");
+            String dbUser = config.getProperty("db.user");
+            String dbPassword = config.getProperty("db.password");
+            return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+        } catch (ClassNotFoundException | SQLException e) {
+            System.err.println("[ERROR] Failed to connect to database");
+            e.printStackTrace();
+            return null;
+        }
     }
 }

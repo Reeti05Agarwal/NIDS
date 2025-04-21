@@ -12,11 +12,7 @@ public class ExtICMPService {
     private ExtICMPDao extICMPDao;
     private ExtICMPDetection extICMPDetection;
     AlertService alertService = new AlertService(); 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ExtICMPService.class);
-
-
-    
-    MYSQLconnection mysqlConnection;
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ExtICMPService.class); 
     Connection conn = MYSQLconnection.getConnection();
     // Load from DB
     public void loadICMPRules(Map<String, Object> packetInfo) {
