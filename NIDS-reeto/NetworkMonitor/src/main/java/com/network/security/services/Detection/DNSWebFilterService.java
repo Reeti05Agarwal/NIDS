@@ -2,47 +2,52 @@ package com.network.security.services.Detection;
 
 import com.network.security.Dao.Detection.DNSWebFilterDao;
 import com.network.security.Intrusion_detection.DNSWebFilterDetector;
+import com.network.security.util.MYSQLconnection;
+import com.network.security.Dao.PacketRetrieverDao;
+import com.network.security.Service.AlertService;
+
 import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Map;
 
 public class DNSWebFilterService {
-    private DNSWebFilterDao dnsWebFilterDao;
-    private DNSWebFilterDetector dnsWebFilterDetector;
+    private DNSWebFilterDao dnsWebFilterDao = new DNSWebFilterDao();
+    private DNSWebFilterDetector dnsWebFilterDetector = new DNSWebFilterDetector();
+    private PacketRetrieverDao packetRetrieverDao;
+    private AlertService alertService = new AlertService();
 
-    public DNSWebFilterService() {
-        this.dnsWebFilterDao = new DNSWebFilterDao();
-        this.dnsWebFilterDetector = new DNSWebFilterDetector("", 0, 0);
-    }
-
-    // Add new DNS Web Filter rule
-    public void addDnsWebFilterRule(Connection conn, String pattern, int threshold, int timeWindow) {
-        dnsWebFilterDao.insertDnsWebFilterRule(conn, pattern, threshold, timeWindow);
-    }
-
+    MYSQLconnection mysqlConnection;
+    Connection conn = MYSQLconnection.getConnection();
+ 
     // Load DNS Web Filter rules from the database and set them in the detector
-    public void loadDnsWebFilterRules(Connection conn) {
-        dnsWebFilterDao.loadDnsWebFilterRules(conn);
-    }
+    public void loadDnsWebFilterRules(Map<String, Object> packetInfo) {
+        try { 
+            String domain = (String) packetInfo.get("HOST_HEADER"); // Could also be under PAYLOAD
+            String srcIP = (String) packetInfo.get("SRC_IP");
+            String dstIP = (String) packetInfo.get("DST_IP");
+            String protocol = (String) packetInfo.get("PROTOCOL");
 
-    // Update the threshold for a DNS Web Filter rule
-    public void updateDnsWebFilterThreshold(Connection conn, int newThreshold, int id) {
-        dnsWebFilterDao.updateDnsWebFilterThreshold(conn, newThreshold, id);
-    }
+            int queryCount = (int) packetInfo.getOrDefault("QUERY_COUNT", 1); 
+            int secondsElapsed = (int) packetInfo.getOrDefault("TIME_ELAPSED", 1); 
+    
+            dnsWebFilterDao.loadDnsWebFilterThreshold(conn, domain);
+    
+            if (dnsWebFilterDetector.detect(domain, queryCount, secondsElapsed)) {
+                System.out.println("[ALERT] Potential DNS Web Filtering evasion attempt detected for domain: " + domain);
 
-    // Update the time window for a DNS Web Filter rule
-    public void updateDnsWebFilterTimeWindow(Connection conn, int newTimeWindow, int id) {
-        dnsWebFilterDao.updateDnsWebFilterTimeWindow(conn, newTimeWindow, id);
-    }
-
-    // Delete a DNS Web Filter rule from the database
-    public void deleteDnsWebFilterRule(Connection conn, int id) {
-        dnsWebFilterDao.deleteDnsWebFilterRule(conn, id);
-    }
-
-    // Detect DNS Web Filter attack based on the query, count, and time elapsed
-    public boolean detectDnsWebFilterAttack(String dnsQuery, int queryCount, int secondsElapsed) {
-        // Load current rules into the detector before detection
-        loadDnsWebFilterRules(null);  // You can pass an actual connection here
-        return dnsWebFilterDetector.detect(dnsQuery, queryCount, secondsElapsed);
+                alertService.triggerAlert(
+                    conn,
+                    srcIP != null ? srcIP : "UNKNOWN",
+                    dstIP != null ? dstIP : "UNKNOWN",
+                    protocol != null ? protocol : "UNKNOWN",
+                    4, // Assume rule_id = 4 for DNS filtering (adjust accordingly)
+                    dnsWebFilterDetector.getSeverity(),
+                    "[DNS Web Filter] Suspicious domain query detected: " + domain
+                );
+            }
+    
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed in DNS Web Filter detection service");
+            e.printStackTrace();
+        }
     }
 }

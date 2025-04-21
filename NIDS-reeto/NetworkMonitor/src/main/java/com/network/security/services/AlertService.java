@@ -1,8 +1,8 @@
-package com.network.security.Service;
-
-import com.network.security.Dao.Alert.AlertDao;
+package com.network.security.services;
 
 import java.sql.Connection;
+
+import com.network.security.Dao.AlertDao;
 
 public class AlertService {
 

@@ -1,52 +1,54 @@
-package com.network.security.Service.Detection;
+package com.network.security.services.Detection;
 
+import com.network.security.Dao.PacketRetrieverDao;
 import com.network.security.Dao.Detection.DpiDetectorDao;
 import com.network.security.Intrusion_detection.DpiDetector;
+import com.network.security.util.MYSQLconnection;
+import com.network.security.Service.AlertService;
 
 import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.Map;
 
 public class DpiService {
-    private DpiDetectorDao dpiDetectorDao;
-    private DpiDetector dpiDetector;
+    private DpiDetectorDao dpiDetectorDao = new DpiDetectorDao();
+    private DpiDetector dpiDetector = new DpiDetector();
+    private PacketRetrieverDao packetRetrieverDao; 
 
-    public DpiService() {
-        dpiDetectorDao = new DpiDetectorDao();
-        dpiDetector = new DpiDetector(""); // Initializing with an empty keyword
-    }
+    private AlertService alertService = new AlertService();
 
-    // Insert a new DPI detection rule into the database
-    public void insertDpiDetectionRule(Connection conn, String keyword) {
-        dpiDetector.setKeyword(keyword);  // Set the keyword in the detector
-        dpiDetectorDao.insertDpiDetector(conn);  // Insert the rule into the database
-    }
+    MYSQLconnection mysqlConnection;
+    Connection conn = MYSQLconnection.getConnection();
 
-    // Load DPI detection rule from the database
-    public void loadDpiDetectionRule(Connection conn) {
-        dpiDetectorDao.loadDpiDetector(conn);  // Load rule from database
-    }
+    // DPI detection based on malicious payloads
+    public void loadDpiDetectorKeywords(Map<String, Object> packetInfo) {
+        try {
+            String payload = (String) packetInfo.get("TCP_PAYLOAD");
+            String srcIP = (String) packetInfo.get("SRC_IP");
+            String destIP = (String) packetInfo.get("DST_IP");
+            String protocol = (String) packetInfo.get("PROTOCOL");
 
-    // Update the DPI detection rule in the database
-    public void updateDpiDetectionRule(Connection conn, String oldKeyword, String newKeyword) {
-        dpiDetectorDao.updateDpiDetectorKeyword(conn, oldKeyword, newKeyword);
-    }
+            if (payload == null) return;
 
-    // Delete a DPI detection rule from the database
-    public void deleteDpiDetectionRule(Connection conn, String keyword) {
-        dpiDetectorDao.deleteDpiDetectorKeyword(conn, keyword);
-    }
+            dpiDetectorDao.loadDpiDetector(conn);
+            boolean detected = dpiDetector.detect(payload);  
 
-    // Detect DPI violation in a given content
-    public boolean detectDpiViolation(String content) {
-        return dpiDetector.detect(content);  // Use the DpiDetector to detect violations in the given content
-    }
+            if (detected) {
+                System.out.println("[ALERT] Deep Packet Inspection detected malicious content in payload: " + payload);
 
-    // Getter and Setter for DpiDetector
-    public DpiDetector getDpiDetector() {
-        return dpiDetector;
-    }
+                alertService.triggerAlert(
+                    conn,
+                    srcIP != null ? srcIP : "UNKNOWN",
+                    destIP != null ? destIP : "UNKNOWN",
+                    protocol != null ? protocol : "UNKNOWN",
+                    3, // Assume rule_id = 3 for DPI detection
+                    dpiDetector.getSeverity(),
+                    "[DPI Detection] Malicious payload string matched: " + payload
+                );
+            }
 
-    public void setDpiDetector(DpiDetector dpiDetector) {
-        this.dpiDetector = dpiDetector;
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed in DPI detection service");
+            e.printStackTrace();
+        }
     }
 }
