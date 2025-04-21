@@ -1,4 +1,4 @@
-    // LoginFrame.java
+// src/main/java/com/network/security/ui/LoginFrame.java
 package com.network.security.ui;
 
 import java.awt.Color;
@@ -21,7 +21,7 @@ import com.network.security.auth.AuthManager;
 
 public class LoginFrame extends JFrame {
 
-    private static final Dimension BUTTON_SIZE = new Dimension(50, 30);
+    private static final Dimension BUTTON_SIZE = new Dimension(100, 30);
 
     private final JTextField usernameField = new JTextField(20);
     private final JPasswordField passwordField = new JPasswordField(20);
@@ -31,7 +31,7 @@ public class LoginFrame extends JFrame {
         this.authManager = authManager;
         setTitle("Secure Login");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(400, 220);
+        setSize(400, 260);
         setLocationRelativeTo(null);
 
         JPanel form = new JPanel(new GridBagLayout());
@@ -41,27 +41,40 @@ public class LoginFrame extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = 1;
 
+        // Username
         gbc.gridx = 0;
         gbc.gridy = 0;
         form.add(new JLabel("Username:"), gbc);
         gbc.gridx = 1;
         form.add(usernameField, gbc);
 
+        // Password
         gbc.gridx = 0;
         gbc.gridy = 1;
         form.add(new JLabel("Password:"), gbc);
         gbc.gridx = 1;
         form.add(passwordField, gbc);
 
+        // Login button
         JButton loginBtn = new JButton("Login");
         loginBtn.setPreferredSize(BUTTON_SIZE);
         loginBtn.addActionListener(this::performLogin);
-
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 2;
         form.add(loginBtn, gbc);
+
+        // Sign Up button (no-arg constructor)
+        JButton signUpBtn = new JButton("Sign Up");
+        signUpBtn.setPreferredSize(BUTTON_SIZE);
+        signUpBtn.addActionListener(e -> {
+            new SignUpFrame().setVisible(true);
+            dispose();
+        });
+        gbc.gridy = 3;
+        form.add(signUpBtn, gbc);
 
         add(form);
     }

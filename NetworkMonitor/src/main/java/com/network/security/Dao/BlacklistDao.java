@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import com.network.security.util.MYSQLconnection;
+import com.network.security.util.DBConnection;
 
 public class BlacklistDao {
 
@@ -16,7 +16,7 @@ public class BlacklistDao {
     public List<String> getAllBlockedIPs() {
         List<String> ips = new ArrayList<>();
         try (
-                Connection conn = MYSQLconnection.getConnection(); 
+                Connection conn = DBConnection.getConnection(); 
                 Statement stmt = conn.createStatement(); 
                 ResultSet rs = stmt.executeQuery(SELECT_SQL)) {
             while (rs.next()) {

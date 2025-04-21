@@ -1,37 +1,38 @@
 package com.network.security.entity;
 
-import com.network.security.entity.Role;
-
 public class User {
-    private int id; //primary key
-    private String username; 
-    private String passwordHash;
-    private Role role;
 
-    // Constructor
-    public User(int id, String username, String passwordHash, Role role) {
+    private final int id;
+    private final String username;
+    private final String email;
+    private final String passwordHash;
+    private final Role role;
+
+    public User(int id, String username, String email, String passwordHash, Role role) {
         this.id = id;
         this.username = username;
+        this.email = email;
         this.passwordHash = passwordHash;
         this.role = role;
     }
 
-    public User(String username, String passwordHash, Role role) {
-        this(-1, username, passwordHash, role);
+    public int getId() {
+        return id;
     }
 
-    // Getters
-    // Encapsulation
-    public int getId() { 
-        return id; 
+    public String getUsername() {
+        return username;
     }
-    public String getUsername() { 
-        return username; 
+
+    public String getEmail() {
+        return email;
     }
-    public String getPasswordHash() { 
-        return passwordHash; 
+
+    public String getPasswordHash() {
+        return passwordHash;
     }
-    public Role getRole() { 
-        return role; 
+
+    public Role getRole() {
+        return role;
     }
 }

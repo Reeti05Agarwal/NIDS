@@ -3,13 +3,13 @@ package com.network.security.services.Detection;
 import java.sql.Connection;
  
 import com.network.security.Dao.Detection.InsiderThreatDao;
-import com.network.security.util.MYSQLconnection;
+import com.network.security.util.DBConnection;
 import com.network.security.Intrusion_detection.InsiderThreatDetector;
 
 public class InsiderThreatService {
     private InsiderThreatDao insiderThreatDao;
     private InsiderThreatDetector insiderThreatDetector; 
-    Connection conn = MYSQLconnection.getConnection();
+    Connection conn = DBConnection.getConnection();
 
     public void loadInsiderThreat() {
         try {

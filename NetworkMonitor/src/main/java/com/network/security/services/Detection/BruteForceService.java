@@ -2,40 +2,43 @@ package com.network.security.services.Detection;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map; 
-import java.util.HashMap;
-import java.sql.Connection;
-
-import com.network.security.Dao.PacketRetrieverDao;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap; // Importing ConcurrentHashMap
+import java.sql.Connection; 
 import com.network.security.Dao.Detection.BruteForceDao;
 import com.network.security.Intrusion_detection.BruteForceDetector; 
-import com.network.security.util.MYSQLconnection;
+import com.network.security.util.DBConnection;
 import com.network.security.util.PacketUtils;
 import com.network.security.services.AlertService; // Assuming you have an AlertService class for alerting
 
 public class BruteForceService {
-    BruteForceDetector bruteForceDetector;
-    PacketRetrieverDao packetRetrieverDao; 
+    BruteForceDetector bruteForceDetector = new BruteForceDetector();
     AlertService alertService = new AlertService(); // Assuming you have an AlertService class for alerting
     BruteForceDao bruteForceDao = new BruteForceDao();
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(BruteForceService.class);
 
-
-    private Map<String, List<Long>> packetTimestamps = new HashMap<>();
-    Connection conn = MYSQLconnection.getConnection();
+    private Map<String, List<Long>> packetTimestamps = new ConcurrentHashMap<>();
+    Connection conn = DBConnection.getConnection();
 
     public void loadBruteForce(Map<String, Object> packetInfo) {
         try { 
-            Object srcPort = packetInfo.get("SRC_PORT"); 
-            Object dstPort = packetInfo.get("DST_PORT");
+            System.out.println("[BRUTE FORCE] Starting Brute Force Detection Function");
+            Integer srcPort = (Integer) packetInfo.get("SRC_PORT"); 
+            Integer dstPort = (Integer) packetInfo.get("DST_PORT");
             String srcIP = (String) packetInfo.get("SRC_IP");
             String dstIP = (String) packetInfo.get("DST_IP");
 
-            int srcPortInt = Integer.parseInt(srcPort.toString()); 
-            int dstPortInt = Integer.parseInt(dstPort.toString());
-            String service = PacketUtils.parseGetService(srcPortInt, dstPortInt); 
+            if (srcIP == null) return;
+            if (srcPort == null && dstPort == null) return;
+
+            String service = PacketUtils.parseGetService(srcPort, dstPort); // SERVICE
             if (service == null) return;
 
+            if (conn == null) {
+                System.out.println("[CONN ERROR] Database connection is null");
+                LOGGER.error("[CONN ERROR] Database connection is null");
+                return;
+            }
             bruteForceDao.loadBruteForceThresholds(conn, service); 
             LOGGER.info("Thresholds loaded for SSH brute force detection.");
 
@@ -54,26 +57,26 @@ public class BruteForceService {
             boolean detected = bruteForceDetector.detect(packetCount, elapsedTime);
 
             if (detected) {
-                System.out.println("[" + service + "] Brute Force attack detected from IP: " + srcIP);
+                System.out.println("[ALERT] [" + service + "] Brute Force attack detected from IP: " + srcIP);
                 LOGGER.info("[" + service + "] Brute Force attack detected from IP: " + srcIP);
                 alertService.triggerAlert(
                     conn,
-                    srcIP,
+                    srcIP != null ? srcIP : "UNKNOWN",
                     dstIP != null ? dstIP : "UNKNOWN", // default fallback if dstIP not found
                     service.toUpperCase(), // protocol
                     1, // assuming rule_id 1 for now, should ideally be passed or mapped
-                    "Critical",
+                    bruteForceDetector.getSeverity(),
                     "Brute Force attack detected on " + service + " from IP: " + srcIP
                 );
-            
+            }
+            else {
+                System.out.println("Brute Force attack NOT detected from IP: " + srcIP);
             }
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to load brute force detection data");
             LOGGER.error("[ERROR] Failed to load brute force detection data", e);
             e.printStackTrace();
         }
-        
-    
     }
 
     private String getKey(String service, String srcIP) {
@@ -82,6 +85,7 @@ public class BruteForceService {
 
     private void addPacketTimestamp(String service, String srcIP, long timestamp) {
         String key = getKey(service, srcIP);
+        // Thread-safe operation for adding a timestamp
         packetTimestamps.putIfAbsent(key, new ArrayList<>());
         packetTimestamps.get(key).add(timestamp);
     }
@@ -89,7 +93,8 @@ public class BruteForceService {
     private void cleanOldTimestamps(List<Long> timestamps, long now) {
         // Calling Time window from bruteForceDetector
         int timeWindow = bruteForceDetector.getBruteTimeWindow();
-        timestamps.removeIf(ts -> now - ts > timeWindow);
+        if (timestamps != null) {
+            timestamps.removeIf(ts -> now - ts > timeWindow);
+        }
     }
-
 }

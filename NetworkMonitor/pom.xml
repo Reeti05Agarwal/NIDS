@@ -1,4 +1,4 @@
-<project xmlns:pom="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                              http://maven.apache.org/maven-v4_0_0.xsd">
@@ -13,7 +13,6 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <!-- switch to Java 14+ so we can use switch expressions and resolve lambda overloads -->
         <maven.compiler.source>14</maven.compiler.source>
         <maven.compiler.target>14</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -42,11 +41,17 @@
             <version>8.0.26</version>
         </dependency>
 
-        <!-- charting -->
+        <!-- JFreeChart (core charting) -->
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
             <version>1.5.3</version>
+        </dependency>
+        <!-- JCommon (required by older JFreeChart pieces) -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jcommon</artifactId>
+            <version>1.0.24</version>
         </dependency>
 
         <!-- modern Look & Feel -->
@@ -59,7 +64,7 @@
 
     <build>
         <plugins>
-            <!-- compile with Java 14, exclude any ExtraPrograms packages -->
+            <!-- compile with Java 14 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -68,9 +73,8 @@
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
                     <excludes>
-                        <!-- drop both possible locations of the old ExtraPrograms classes -->
-                        <exclude>com/network/security/ExtraPrograms/</exclude>
-                        <exclude>com/network/security/services/ExtraPrograms/</exclude>
+                        <exclude>com/network/security/ExtraPrograms/**</exclude>
+                        <exclude>com/network/security/services/ExtraPrograms/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

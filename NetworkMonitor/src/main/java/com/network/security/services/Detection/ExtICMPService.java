@@ -2,7 +2,7 @@ package com.network.security.services.Detection;
  
 import com.network.security.Dao.Detection.ExtICMPDao;
 import com.network.security.Intrusion_detection.ExtICMPDetection;
-import com.network.security.util.MYSQLconnection;
+import com.network.security.util.DBConnection;
 import com.network.security.services.AlertService;
 
 import java.sql.Connection;
@@ -13,14 +13,21 @@ public class ExtICMPService {
     private ExtICMPDetection extICMPDetection;
     AlertService alertService = new AlertService(); 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ExtICMPService.class); 
-    Connection conn = MYSQLconnection.getConnection();
+    Connection conn = DBConnection.getConnection();
     // Load from DB
     public void loadICMPRules(Map<String, Object> packetInfo) {
         try { 
+            System.out.println("[EXTERNAL ICMP] Starting External ICMP Detection Function");
             String srcIP = (String) packetInfo.get("SRC_IP");
             String dstIP = (String) packetInfo.get("DST_IP");
-            String protocol = (String) packetInfo.getOrDefault("PROTOCOL", "ICMP");
-
+            String protocol = (String) packetInfo.get("PROTOCOL");
+            if (srcIP == null || dstIP == null) return;
+            
+            if (conn == null) {
+                System.out.println("[CONN ERROR] Database connection is null");
+                LOGGER.error("[CONN ERROR] Database connection is null");
+                return;
+            }
             extICMPDao.loadICMPip(conn);
 
             if (extICMPDetection == null) {
@@ -29,7 +36,7 @@ public class ExtICMPService {
             boolean detected = extICMPDetection.detect(srcIP, dstIP);
 
             if (detected) {
-                System.out.println("External ICMP Black attack detected from IP: " + srcIP + " to " + dstIP);
+                System.out.println("[ALERT] External ICMP Black attack detected from IP: " + srcIP + " to " + dstIP);
                 LOGGER.info("External ICMP Black attack detected from IP: " + srcIP + " to " + dstIP);
                 alertService.triggerAlert(
                     conn,
@@ -40,6 +47,9 @@ public class ExtICMPService {
                     extICMPDetection.getSeverity(),
                     "[External ICMP Detection] Blacklisted IP triggered alert"
                 );
+            }
+            else{
+                System.out.println("NO External ICMP Black attack detected from IP: " + srcIP + " to " + dstIP);
             }
 
         }

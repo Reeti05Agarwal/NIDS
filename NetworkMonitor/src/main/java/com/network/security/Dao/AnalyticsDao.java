@@ -4,56 +4,70 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.LinkedHashMap;
-import java.util.Map; 
-import com.network.security.util.MYSQLconnection;
+import java.util.Map;
 
 /**
- * Simple aggregates that feed MainFrame charts – Java‑14‑friendly.
+ * DAO for querying analytics metrics.
  */
 public class AnalyticsDao {
 
-    public Map<String, Integer> topMaliciousIps(int limit) throws Exception {
-        String sql
-                = "SELECT source_ip, COUNT(*) AS hits "
-                + "FROM alerts "
-                + "GROUP BY source_ip "
-                + "ORDER BY hits DESC "
-                + "LIMIT ?";
-        return queryToMap(sql, limit);
+    /**
+     * Real‑time traffic: number of packets seen per protocol.
+     */
+    public Map<String, Integer> getPacketCountsByProtocol(Connection conn) throws Exception {
+        String sql = "SELECT protocol, COUNT(*) AS cnt FROM packets GROUP BY protocol";
+        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            Map<String, Integer> m = new LinkedHashMap<>();
+            while (rs.next()) {
+                m.put(rs.getString("protocol"), rs.getInt("cnt"));
+            }
+            return m;
+        }
     }
 
-    public Map<String, Integer> portActivity(int limit) throws Exception {
-        String sql
-                = "SELECT CAST(destPort AS CHAR), COUNT(*) AS cnt "
-                + "FROM Transport_Layer "
-                + "GROUP BY destPort "
-                + "ORDER BY cnt DESC "
-                + "LIMIT ?";
-        return queryToMap(sql, limit);
+    /**
+     * Suspicious activity: alerts per severity.
+     */
+    public Map<String, Integer> getAlertCountsBySeverity(Connection conn) throws Exception {
+        String sql = "SELECT severity, COUNT(*) AS cnt FROM alerts GROUP BY severity";
+        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            Map<String, Integer> m = new LinkedHashMap<>();
+            while (rs.next()) {
+                m.put(rs.getString("severity"), rs.getInt("cnt"));
+            }
+            return m;
+        }
     }
 
-    public Map<String, Integer> attackedServices(int limit) throws Exception {
-        String sql
-                = "SELECT App_Protocol, COUNT(*) AS cnt "
-                + "FROM Application_Layer "
-                + "GROUP BY App_Protocol "
-                + "ORDER BY cnt DESC "
-                + "LIMIT ?";
-        return queryToMap(sql, limit);
-    }
-
-    /* ---------- private helper ---------------------------------------- */
-    private Map<String, Integer> queryToMap(String sql, int limit) throws Exception {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        try (Connection c = MYSQLconnection.getConnection(); PreparedStatement ps = c.prepareStatement(sql)) {
-
+    /**
+     * Top malicious IPs by number of critical alerts.
+     */
+    public Map<String, Integer> getTopMaliciousIPs(Connection conn, int limit) throws Exception {
+        String sql = "SELECT source_ip, COUNT(*) AS cnt FROM alerts "
+                + "WHERE severity = 'Critical' GROUP BY source_ip ORDER BY cnt DESC LIMIT ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, limit);
             try (ResultSet rs = ps.executeQuery()) {
+                Map<String, Integer> m = new LinkedHashMap<>();
                 while (rs.next()) {
-                    map.put(rs.getString(1), rs.getInt(2));
+                    m.put(rs.getString("source_ip"), rs.getInt("cnt"));
                 }
+                return m;
             }
         }
-        return map;
+    }
+
+    /**
+     * Anomaly detection counts by anomaly type.
+     */
+    public Map<String, Integer> getAnomalyCounts(Connection conn) throws Exception {
+        String sql = "SELECT anomaly_type, COUNT(*) AS cnt FROM anomalies GROUP BY anomaly_type";
+        try (PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            Map<String, Integer> m = new LinkedHashMap<>();
+            while (rs.next()) {
+                m.put(rs.getString("anomaly_type"), rs.getInt("cnt"));
+            }
+            return m;
+        }
     }
 }

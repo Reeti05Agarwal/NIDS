@@ -2,7 +2,7 @@ package com.network.security.services.Detection;
 
 import com.network.security.Dao.Detection.DoSDetectorDao;
 import com.network.security.Intrusion_detection.DoSDetector; 
-import com.network.security.util.MYSQLconnection;
+import com.network.security.util.DBConnection;
 import com.network.security.util.PacketTracker;
 import com.network.security.services.AlertService; // Assuming you have an AlertService class for alerting
 
@@ -15,12 +15,14 @@ public class DosService {
     private DoSDetector doSDetector;
     AlertService alertService = new AlertService(); // Assuming you have an AlertService class for alerting
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DosService.class); 
-    Connection conn = MYSQLconnection.getConnection();
+    Connection conn = DBConnection.getConnection();
 
     // Load rule from DB and update doSDetector object
     public void loadDosService(Map<String, Object> packetInfo) {
         try { 
+            System.out.println("[DDoS SERVICE] Starting DDoS Attack Detection Function");
             String sourceIP = (String) packetInfo.get("SRC_IP");
+            if (sourceIP== null) return;
             String destIP = (String) packetInfo.get("DST_IP");
             String protocol = (String) packetInfo.get("PROTOCOL");
 
@@ -63,26 +65,37 @@ public class DosService {
             }
 
             if (attackType != null) {
+                if (conn == null) {
+                    System.out.println("[CONN ERROR] Database connection is null");
+                    LOGGER.error("[CONN ERROR] Database connection is null");
+                    return;
+                }
                 doSDetectorDao.loadDoSDetector(conn, attackType);
 
-                if (doSDetector.detect(packetCount, timeElapsed)) {
+                if (packetCount==0 || timeElapsed == 0) return;
+
+                boolean detected = doSDetector.detect(packetCount, timeElapsed); 
+                if (detected) {
                     System.out.println("[ALERT] DoS Attack Detected - Type: " + doSDetector.getDosAttackType()
                             + " | Packet Count: " + packetCount
                             + " | Time Elapsed: " + timeElapsed + " sec");
                     LOGGER.info("[ALERT] DoS Attack Detected - Type: " + doSDetector.getDosAttackType()
                             + " | Packet Count: " + packetCount
                             + " | Time Elapsed: " + timeElapsed + " sec");
-                            alertService.triggerAlert(
-                                conn,
-                                sourceIP != null ? sourceIP : "UNKNOWN",
-                                destIP != null ? destIP : "UNKNOWN",
-                                protocol != null ? protocol : "UNKNOWN",
-                                2, // Assume rule_id = 2 for DoS attack rules
-                                doSDetector.getSeverity(),
-                                "[DoS Attack] Type: " + doSDetector.getDosAttackType() 
-                                    + ", Packets: " + packetCount 
-                                    + ", Time: " + timeElapsed + " sec"
-                            );
+                    alertService.triggerAlert(
+                        conn,
+                        sourceIP != null ? sourceIP : "UNKNOWN",
+                        destIP != null ? destIP : "UNKNOWN",
+                        protocol != null ? protocol : "UNKNOWN",
+                        2, // Assume rule_id = 2 for DoS attack rules
+                        doSDetector.getSeverity(),
+                        "[DoS Attack] Type: " + doSDetector.getDosAttackType() 
+                            + ", Packets: " + packetCount 
+                            + ", Time: " + timeElapsed + " sec"
+                    );
+                }
+                else{
+                    System.out.println("DoS Attack NOT Detected");
                 }
             }
         } catch (Exception e) {

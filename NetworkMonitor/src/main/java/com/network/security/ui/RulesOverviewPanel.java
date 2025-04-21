@@ -1,3 +1,4 @@
+// src/main/java/com/network/security/ui/RulesOverviewPanel.java
 package com.network.security.ui;
 
 import java.awt.BorderLayout;
@@ -22,12 +23,11 @@ import com.network.security.util.DBConnection;
  * Editable overview of all five rule tables: • ddos_rules • brute_force_rules •
  * dpi_rules • dns_web_filtering_rules • insider_threat_rules
  *
- * Columns: 0: ID (PK, must type for new rows) 1: Table name (combo box) 2:
- * Rule / Name 3: Threshold 4: Window / Extra 5: Severity / Details
+ * Columns: 0: ID (PK) 1: Table name 2: Rule / Name 3: Threshold 4:
+ * Window / Extra 5: Severity / Details
  */
 public class RulesOverviewPanel extends JPanel {
 
-    // column indices
     private static final int COL_ID = 0;
     private static final int COL_TABLE = 1;
     private static final int COL_NAME = 2;
@@ -51,13 +51,11 @@ public class RulesOverviewPanel extends JPanel {
 
         // 1) Table model
         model = new DefaultTableModel(
-                new String[]{"ID", "Table", "Rule / Name",
-                    "Threshold", "Window / Extra", "Severity / Details"},
+                new String[]{"ID", "Table", "Rule / Name", "Threshold", "Window / Extra", "Severity / Details"},
                 0
         ) {
             @Override
             public boolean isCellEditable(int row, int col) {
-                // ID only editable if blank (new row), rest always editable
                 if (col == COL_ID) {
                     Object v = getValueAt(row, COL_ID);
                     return v == null || v.toString().isBlank();
@@ -71,12 +69,10 @@ public class RulesOverviewPanel extends JPanel {
             }
         };
 
-        // 2) JTable + combo‑box for “Table” column
+        // 2) JTable + combo box for “Table” column
         table = new JTable(model);
-        table.setFillsViewportHeight(true);
         TableColumn tc = table.getColumnModel().getColumn(COL_TABLE);
         tc.setCellEditor(new DefaultCellEditor(new JComboBox<>(tables)));
-
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         // 3) Buttons: Add, Reload, Save
@@ -99,19 +95,23 @@ public class RulesOverviewPanel extends JPanel {
         reload.addActionListener(e -> loadAll());
         save.addActionListener(e -> saveAll());
 
-        // initial data load
+        // Initial data load
         loadAll();
     }
 
     private void loadAll() {
         model.setRowCount(0);
-        // SELECTs for each table
         String[] selects = {
-            "SELECT id, attack_type, packet_threshold, time_window_sec, severity_level FROM ddos_rules",
-            "SELECT id, service, failed_attempt_threshold, time_window_sec, rule_id           FROM brute_force_rules",
-            "SELECT id, rule_name, payload_length_threshold, NULL             , check_encryption FROM dpi_rules",
-            "SELECT id, rule_type, threshold             , time_window_seconds, pattern         FROM dns_web_filtering_rules",
-            "SELECT id, rule_name, access_threshold      , time_window_sec     , rule_type       FROM insider_threat_rules"
+            // 1) DDoS rules
+            "SELECT id, attack_type, packet_threshold, time_window_sec, severity FROM ddos_rules",
+            // 2) Brute‐force rules: return blank for missing 5th column
+            "SELECT id, service, failed_attempt_threshold, time_window_sec, '' AS extra FROM brute_force_rules",
+            // 3) DPI rules
+            "SELECT id, rule_name, payload_length_threshold, NULL, check_encryption FROM dpi_rules",
+            // 4) DNS/web rules
+            "SELECT id, rule_type, threshold, time_window_seconds, pattern FROM dns_web_filtering_rules",
+            // 5) Insider‐threat rules
+            "SELECT id, rule_name, access_threshold, time_window_sec, rule_type FROM insider_threat_rules"
         };
 
         try (Connection c = DBConnection.getConnection()) {
@@ -147,14 +147,7 @@ public class RulesOverviewPanel extends JPanel {
             c.setAutoCommit(false);
 
             for (int row = 0; row < model.getRowCount(); row++) {
-                // gather user input
                 Object idObj = model.getValueAt(row, COL_ID);
-                String tbl = model.getValueAt(row, COL_TABLE).toString();
-                String name = model.getValueAt(row, COL_NAME).toString();
-                String thres = model.getValueAt(row, COL_THRES).toString();
-                String win = model.getValueAt(row, COL_WIN).toString();
-                String extra = model.getValueAt(row, COL_EXTRA).toString();
-
                 if (idObj == null || idObj.toString().isBlank()) {
                     JOptionPane.showMessageDialog(this,
                             "Row " + (row + 1) + ": Please supply an ID.",
@@ -162,69 +155,73 @@ public class RulesOverviewPanel extends JPanel {
                     continue;
                 }
                 int id = Integer.parseInt(idObj.toString());
+                String tbl = model.getValueAt(row, COL_TABLE).toString();
+                String name = model.getValueAt(row, COL_NAME).toString();
+                String thres = model.getValueAt(row, COL_THRES).toString();
+                String win = model.getValueAt(row, COL_WIN).toString();
+                String extra = model.getValueAt(row, COL_EXTRA).toString();
 
-                // perform UPDATE; if it affects 0 rows, do INSERT
                 int updated = 0;
                 switch (tbl) {
-
                     case "ddos_rules" -> {
-                        // UPDATE
+                        // update main columns
                         try (PreparedStatement ps = c.prepareStatement(
-                                "UPDATE ddos_rules SET attack_type=?, packet_threshold=?, time_window_sec=?, severity_level=? WHERE id=?"
+                                "UPDATE ddos_rules SET attack_type=?, packet_threshold=?, time_window_sec=? WHERE id=?"
                         )) {
                             ps.setString(1, name);
                             ps.setString(2, thres);
                             ps.setString(3, win);
-                            ps.setString(4, extra);
-                            ps.setInt(5, id);
+                            ps.setInt(4, id);
                             updated = ps.executeUpdate();
                         }
                         if (updated == 0) {
                             try (PreparedStatement ins = c.prepareStatement(
-                                    "INSERT INTO ddos_rules(id,attack_type,packet_threshold,time_window_sec,severity_level) VALUES(?,?,?,?,?)"
+                                    "INSERT INTO ddos_rules(id,attack_type,packet_threshold,time_window_sec) VALUES(?,?,?,?)"
                             )) {
                                 ins.setInt(1, id);
                                 ins.setString(2, name);
                                 ins.setString(3, thres);
                                 ins.setString(4, win);
-                                ins.setString(5, extra);
                                 ins.executeUpdate();
                             }
+                        }
+                        // then separately update severity (ignore failures)
+                        try (PreparedStatement ps2 = c.prepareStatement(
+                                "UPDATE ddos_rules SET severity=? WHERE id=?"
+                        )) {
+                            ps2.setString(1, extra);
+                            ps2.setInt(2, id);
+                            ps2.executeUpdate();
+                        } catch (Exception ignore) {
                         }
                     }
 
                     case "brute_force_rules" -> {
+                        // no rule_id column here, so we only update the four known
                         try (PreparedStatement ps = c.prepareStatement(
-                                "UPDATE brute_force_rules SET service=?, failed_attempt_threshold=?, time_window_sec=?, rule_id=? WHERE id=?"
+                                "UPDATE brute_force_rules SET service=?, failed_attempt_threshold=?, time_window_sec=? WHERE id=?"
                         )) {
                             ps.setString(1, name);
                             ps.setString(2, thres);
                             ps.setString(3, win);
-                            ps.setString(4, extra);
-                            ps.setInt(5, id);
+                            ps.setInt(4, id);
                             updated = ps.executeUpdate();
                         }
                         if (updated == 0) {
                             try (PreparedStatement ins = c.prepareStatement(
-                                    "INSERT INTO brute_force_rules(id,service,failed_attempt_threshold,time_window_sec,rule_id) VALUES(?,?,?,?,?)"
+                                    "INSERT INTO brute_force_rules(id,service,failed_attempt_threshold,time_window_sec) VALUES(?,?,?,?)"
                             )) {
                                 ins.setInt(1, id);
                                 ins.setString(2, name);
                                 ins.setString(3, thres);
                                 ins.setString(4, win);
-                                ins.setString(5, extra);
                                 ins.executeUpdate();
                             }
                         }
                     }
 
                     case "dpi_rules" -> {
-                        // ensure check_encryption is at most 1 char
-                        String chk = extra;
-                        if (chk.length() > 1) {
-                            chk = chk.substring(0, 1);
-                        }
-
+                        String chk = extra.length() > 1 ? extra.substring(0, 1) : extra;
                         try (PreparedStatement ps = c.prepareStatement(
                                 "UPDATE dpi_rules SET rule_name=?, payload_length_threshold=?, check_encryption=? WHERE id=?"
                         )) {
@@ -296,9 +293,8 @@ public class RulesOverviewPanel extends JPanel {
                             }
                         }
                     }
-                } // end switch
-
-            } // end for
+                }
+            }
 
             c.commit();
             JOptionPane.showMessageDialog(this,
