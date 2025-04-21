@@ -4,6 +4,7 @@ import java.util.List;
 
 public class ExtICMPDetection {
     private List<String> exticmpIPAddress;
+    private String severity;
 
     public List<String> getExticmpIPAddress() {
         return exticmpIPAddress;
@@ -11,6 +12,14 @@ public class ExtICMPDetection {
 
     public void setExticmpIPAddress(List<String> exticmpIPAddress) {
         this.exticmpIPAddress = exticmpIPAddress;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
     }
 
     public boolean detect(String srcIP, String destIP) {

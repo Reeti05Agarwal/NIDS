@@ -26,7 +26,7 @@ public class DNSWebFilterDao {
 
     // Load the brute force detection thresholds from the database
     public void loadDnsWebFilterThreshold(Connection conn, String pattern) {
-        String sql = "SELECT pattern, threshold, time_window_seconds FROM dns_web_filtering_rules WHERE pattern = ?";
+        String sql = "SELECT pattern, threshold, time_window_seconds, severity FROM dns_web_filtering_rules WHERE pattern = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, pattern);
             ResultSet rs = stmt.executeQuery();
@@ -35,6 +35,7 @@ public class DNSWebFilterDao {
                 dnsWebFilterDetector.setDnsWebFilterPattern(rs.getString("pattern"));
                 dnsWebFilterDetector.setDnsWebFilterThreshold(rs.getInt("threshold"));
                 dnsWebFilterDetector.setDnsWebFilterTimeWindow(rs.getInt("time_window_seconds"));
+                dnsWebFilterDetector.setSeverity(rs.getString("severity"));
             }
 
         } catch (SQLException e) {

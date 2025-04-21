@@ -29,7 +29,7 @@ public class DpiDetectorDao {
     // Load the brute force detection thresholds from the database
     public void loadDpiDetector(Connection conn) {
         List<String> keywords_list = new ArrayList<>();
-        String sql = "SELECT keyword FROM dpi_keywords ";
+        String sql = "SELECT keyword, severity FROM dpi_keywords ";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -37,6 +37,7 @@ public class DpiDetectorDao {
                 keywords_list.add(rs.getString("keyword"));
             }
             dpiDetector.setKeyword(keywords_list);
+            dpiDetector.setSeverity(rs.getString("severity"));
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load brute force thresholds");

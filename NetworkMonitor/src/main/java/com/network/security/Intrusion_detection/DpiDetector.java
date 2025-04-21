@@ -4,6 +4,7 @@ import java.util.List;
 
 public class DpiDetector {
     private List<String> keyword;
+    private String severity;
 
     public DpiDetector(List<String> keyword) {
         this.keyword = keyword;
@@ -15,6 +16,14 @@ public class DpiDetector {
 
     public void setKeyword(List<String> keyword) {
         this.keyword = keyword;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
     }
 
     public boolean detect(String content) {

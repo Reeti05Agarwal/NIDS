@@ -29,7 +29,7 @@ public class SuspiciousUserAgentDao {
     // Load the brute force detection thresholds from the database
     public void loadSuspiciousUserAgent(Connection conn) {
         List<String> agents = new ArrayList<>();
-        String sql = "SELECT user_agent FROM suspicious_user_agents";
+        String sql = "SELECT user_agent, severity FROM suspicious_user_agents";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -37,6 +37,7 @@ public class SuspiciousUserAgentDao {
                 agents.add(rs.getString("user_agent"));
             }
             suspiciousUserAgentDetection.setSudKeyword(agents);
+            suspiciousUserAgentDetection.setSeverity(rs.getString("severity"));
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load brute force thresholds");

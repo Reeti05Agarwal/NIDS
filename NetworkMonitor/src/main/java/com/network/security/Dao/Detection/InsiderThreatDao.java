@@ -25,13 +25,14 @@ public class InsiderThreatDao {
 
     // Load the brute force detection thresholds from the database
     public void loadInsiderThreatDetector(Connection conn) {
-        String sql = "SELECT access_threshold, time_window_sec FROM insider_threat_rules ";
+        String sql = "SELECT access_threshold, time_window_sec, severity FROM insider_threat_rules ";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 insiderThreatDetector.setInsiderPacketThreshold(rs.getInt("access_threshold"));
                 insiderThreatDetector.setInsiderTimeWindow(rs.getInt("time_window_sec"));
+                insiderThreatDetector.setSeverity(rs.getString("severity"));
             }
 
         } catch (SQLException e) {

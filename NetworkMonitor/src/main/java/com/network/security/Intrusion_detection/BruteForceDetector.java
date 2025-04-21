@@ -7,6 +7,7 @@ package com.network.security.Intrusion_detection;
 public class BruteForceDetector {
     private int brutePacketThreshold;
     private int bruteTimeWindow;
+    private String severity;
 
     // public BruteForceDetector(int brutePacketThreshold, int bruteTimeWindow) {
     //     this.brutePacketThreshold = brutePacketThreshold;
@@ -25,6 +26,14 @@ public class BruteForceDetector {
     }
     public void setBruteTimeWindow(int bruteTimeWindow) {
         this.bruteTimeWindow = bruteTimeWindow;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
     }
 
     // Method to detect brute force attacks based on packet count and time window

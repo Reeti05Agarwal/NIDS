@@ -3,11 +3,8 @@ package com.network.security.Intrusion_detection;
 public class InsiderThreatDetector {
     private int insiderPacketThreshold;
     private int insiderTimeWindow;
-
-    public InsiderThreatDetector(int insiderPacketThreshold, int insiderTimeWindow) {
-        this.insiderPacketThreshold = insiderPacketThreshold;
-        this.insiderTimeWindow = insiderTimeWindow;
-    }
+    private String severity;
+ 
 
     public int getInsiderPacketThreshold() {
         return insiderPacketThreshold;
@@ -23,6 +20,14 @@ public class InsiderThreatDetector {
 
     public void setInsiderTimeWindow(int insiderTimeWindow) {
         this.insiderTimeWindow = insiderTimeWindow;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
     }
 
     public boolean detect(String service, int failedAttemptsCounts, int seconds) {

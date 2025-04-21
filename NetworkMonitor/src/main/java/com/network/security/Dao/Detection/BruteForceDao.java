@@ -27,7 +27,7 @@ public class BruteForceDao {
 
     // Load the brute force detection thresholds from the database
     public void loadBruteForceThresholds(Connection conn, String service) {
-        String sql = "SELECT failed_attempt_threshold, time_window_sec FROM brute_force_rules where service = ?";
+        String sql = "SELECT failed_attempt_threshold, time_window_sec, severity FROM brute_force_rules where service = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, service);
             ResultSet rs = stmt.executeQuery();
@@ -35,6 +35,7 @@ public class BruteForceDao {
             while (rs.next()) {
                 bruteForceDetector.setBrutePacketThreshold(rs.getInt("failed_attempt_threshold"));
                 bruteForceDetector.setBruteTimeWindow(rs.getInt("time_window_sec"));
+                bruteForceDetector.setSeverity(rs.getString("severity"));
             }
 
         } catch (SQLException e) {

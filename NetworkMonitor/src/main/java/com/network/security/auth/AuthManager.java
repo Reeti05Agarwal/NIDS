@@ -4,6 +4,7 @@ import com.network.security.entity.User;
 import com.network.security.services.UserService;
 
 public class AuthManager {
+
     private final UserService userService;
     private User loggedInUser = null;
 

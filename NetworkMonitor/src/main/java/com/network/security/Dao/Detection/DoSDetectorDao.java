@@ -27,7 +27,7 @@ public class DoSDetectorDao {
 
     // Load the brute force detection thresholds from the database
     public void loadDoSDetector(Connection conn, String attackType) {
-        String sql = "SELECT attack_type, packet_threshold, time_window_sec FROM ddos_rules WHERE attack_type = ?";
+        String sql = "SELECT attack_type, packet_threshold, time_window_sec, severity FROM ddos_rules WHERE attack_type = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, attackType);
             ResultSet rs = stmt.executeQuery();
@@ -36,6 +36,7 @@ public class DoSDetectorDao {
                 doSDetector.setDosAttackType(rs.getString("attack_type"));
                 doSDetector.setDosPacketThreshold(rs.getInt("packet_threshold"));
                 doSDetector.setDosTimeWindow(rs.getInt("time_window_sec"));
+                doSDetector.setSeverity(rs.getString("severity"));
             }
 
         } catch (SQLException e) {

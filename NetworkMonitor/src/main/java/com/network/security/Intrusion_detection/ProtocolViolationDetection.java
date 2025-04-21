@@ -5,6 +5,7 @@
 //     private int violationThreshold;
 //     private int violationTimeWindow;
 //     private String protocolType;
+//     private String severity;
 
 //     // Detection logic
 //     public boolean detect(int violationCount, int secondsElapsed) {

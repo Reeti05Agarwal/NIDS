@@ -4,6 +4,7 @@ public class DNSWebFilterDetector {
     private String dnsWebFilterPattern;
     private int dnsWebFilterThreshold;
     private int dnsWebFilterTimeWindow;
+    private String severity;
 
     public String getDnsWebFilterPattern() {
         return dnsWebFilterPattern;
@@ -27,6 +28,14 @@ public class DNSWebFilterDetector {
 
     public void setDnsWebFilterTimeWindow(int dnsWebFilterTimeWindow) {
         this.dnsWebFilterTimeWindow = dnsWebFilterTimeWindow;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
     }
 
     public boolean detect(String dnsQuery, int queryCount, int secondsElapsed) {

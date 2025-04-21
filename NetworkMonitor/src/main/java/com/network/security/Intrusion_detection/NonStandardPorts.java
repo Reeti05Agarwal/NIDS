@@ -4,4 +4,5 @@ public class NonStandardPorts {
     //setNSPProtocolName
     //setNSPExpectedPort
     //setNSPActaulPort
+    //private String severity;
 }

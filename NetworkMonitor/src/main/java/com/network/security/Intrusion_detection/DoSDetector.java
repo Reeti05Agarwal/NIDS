@@ -4,6 +4,7 @@ public class DoSDetector {
     private int dosPacketThreshold;
     private int dosTimeWindow;
     private String dosAttackType;
+    private String severity;
 
     public int getDosPacketThreshold() {
         return dosPacketThreshold;
@@ -26,6 +27,14 @@ public class DoSDetector {
     }
     public void setDosAttackType(String dosAttackType) {
         this.dosAttackType = dosAttackType;
+    }
+
+    public String getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(String severity) {
+        this.severity = severity;
     }
 
     public boolean detect(int packetCount, int secondsElapsed) {
