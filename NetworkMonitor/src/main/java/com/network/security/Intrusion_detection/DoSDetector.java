@@ -30,7 +30,6 @@ public class DoSDetector {
 
     public boolean detect(int packetCount, int secondsElapsed) {
         return packetCount > dosPacketThreshold && secondsElapsed <= dosTimeWindow; 
-             
-     
+        
     }
 }

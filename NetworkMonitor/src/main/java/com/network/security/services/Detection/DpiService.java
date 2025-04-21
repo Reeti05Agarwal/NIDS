@@ -1,41 +1,39 @@
 package com.network.security.services.Detection;
 
+import com.network.security.Dao.PacketRetrieverDao;
 import com.network.security.Dao.Detection.DpiDetectorDao;
 import com.network.security.Intrusion_detection.DpiDetector;
+import com.network.security.util.MYSQLconnection;
+
 import java.sql.Connection;
+import java.util.Map;
 
 public class DpiService {
     private DpiDetectorDao dpiDetectorDao;
     private DpiDetector dpiDetector;
+    PacketRetrieverDao packetRetrieverDao; 
 
-    public DpiService() {
-        this.dpiDetector = new DpiDetector("");
-        this.dpiDetectorDao = new DpiDetectorDao(dpiDetector);
-    }
+    MYSQLconnection mysqlConnection;
+    Connection conn = MYSQLconnection.getConnection();
 
     // Add a new DPI detection keyword
-    public void addDpiDetectorKeyword(Connection conn, String keyword) {
-        dpiDetector.setKeyword(keyword);
-        dpiDetectorDao.insertDpiDetector(conn);
-    }
+    public void loadDpiDetectorKeywords(Map<String, Object> packetInfo) {
+         try {
+            String payload = (String) packetInfo.get("TCP_PAYLOAD");
 
-    // Load the DPI detection keywords from the database and set them in the detector
-    public void loadDpiDetectorKeywords(Connection conn) {
-        dpiDetectorDao.loadDpiDetector(conn);
-    }
+            if (payload == null) return;
 
-    // Detect DPI violation based on content
-    public boolean detectDpiViolation(String content) {
-        return dpiDetector.detect(content);
-    }
+            dpiDetectorDao.loadDpiDetector(conn);
+            boolean detected = dpiDetector.detect(payload);  
 
-    // Update an existing DPI detection keyword
-    public void updateDpiDetectorKeyword(Connection conn, String oldKeyword, String newKeyword) {
-        dpiDetectorDao.updateDpiDetectorKeyword(conn, oldKeyword, newKeyword);
-    }
+            if (detected) {
+                System.out.println("Deep Packet Inspection detected malicious Strings: " + payload);
+            }
 
-    // Delete a DPI detection keyword
-    public void deleteDpiDetectorKeyword(Connection conn, String keyword) {
-        dpiDetectorDao.deleteDpiDetectorKeyword(conn, keyword);
+
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to add DPI detection keyword");
+            e.printStackTrace();
+        }
     }
 }

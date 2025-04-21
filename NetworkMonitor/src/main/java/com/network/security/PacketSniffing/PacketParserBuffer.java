@@ -388,7 +388,7 @@ public class PacketParserBuffer {
         String packetStr = new String(byteArray); // Convert to String for HTTP content extraction
         String method = PacketUtils.parseHttpMethods(packetStr);
         packetData.put("HTTP_METHOD", method);
-        packetData.put("HOST", PacketUtils.extractHeader(packetStr, "Host:"));
+        packetData.put("HOST", PacketUtils.extractHeader(packetStr, "Host:")); // Host potential values: 
         packetData.put("USER_AGENT", PacketUtils.extractHeader(packetStr, "User-Agent:"));
         packetData.put("AUTH",PacketUtils.extractHeader(packetStr, "Authorization:"));
         packetData.put("CONTENT_TYPE", PacketUtils.extractHeader(packetStr, "Content-Type:"));

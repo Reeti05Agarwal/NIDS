@@ -1,50 +1,43 @@
-package com.network.security.Service;
+package com.network.security.services.Detection;
 
+import com.network.security.Dao.PacketRetrieverDao;
 import com.network.security.Dao.Detection.ExtICMPDao;
 import com.network.security.Intrusion_detection.ExtICMPDetection;
+import com.network.security.util.MYSQLconnection;
 
 import java.sql.Connection;
+import java.util.Map;
 
 public class ExtICMPService {
     private ExtICMPDao extICMPDao;
     private ExtICMPDetection extICMPDetection;
+    PacketRetrieverDao packetRetrieverDao; 
 
-    public ExtICMPService() {
-        this.extICMPDao = new ExtICMPDao();
-    }
-
-    // Set detector object in both service and DAO
-    public void setDetector(ExtICMPDetection detector) {
-        this.extICMPDetection = detector;
-        extICMPDao.setExtICMPDetection(detector);
-    }
-
-    // Insert rule
-    public void insertICMPRule(Connection conn) {
-        extICMPDao.insertExtICMPDetection(conn);
-    }
-
+    
+    MYSQLconnection mysqlConnection;
+    Connection conn = MYSQLconnection.getConnection();
     // Load from DB
-    public void loadICMPRules(Connection conn) {
-        extICMPDao.loadBruteForceThresholds(conn);
-    }
+    public void loadICMPRules(Map<String, Object> packetInfo) {
+        try { 
+            String srcIP = (String) packetInfo.get("SRC_IP");
+            String dstIP = (String) packetInfo.get("DST_IP");
 
-    // Update rule
-    public void updateICMPRule(Connection conn, String newIPAddress, int id) {
-        extICMPDao.updateExtICMPDetection(conn, newIPAddress, id);
-    }
+            extICMPDao.loadICMPip(conn);
 
-    // Delete rule
-    public void deleteICMPRule(Connection conn, int id) {
-        extICMPDao.deleteExtICMPDetection(conn, id);
-    }
+            if (extICMPDetection == null) {
+                extICMPDetection = new ExtICMPDetection();
+            }        
+            boolean detected = extICMPDetection.detect(srcIP, dstIP);
 
-    // Detect if packet IP matches ICMP block rule
-    public boolean detectICMPIntrusion(String packetIP) {
-        if (extICMPDetection == null) {
-            System.err.println("[ERROR] Detection logic not initialized.");
-            return false;
+            if (detected) {
+                System.out.println("External ICMP Black attack detected from IP: " + srcIP + " to " + dstIP);
+            }
+
         }
-        return extICMPDetection.detect(packetIP);
+        catch (Exception e) {
+            System.err.println("[ERROR] Failed to load ICMP detection data");
+            e.printStackTrace();
+        }
     }
+ 
 }

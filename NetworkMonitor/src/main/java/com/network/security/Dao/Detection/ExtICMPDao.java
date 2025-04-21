@@ -29,8 +29,8 @@ public class ExtICMPDao {
     }
 
     // Load the brute force detection thresholds from the database
-    public void loadBruteForceThresholds(Connection conn) {
-        List<String> ipList = new ArrayList<>();
+    public void loadICMPip(Connection conn) {
+        List<String> ipList = new ArrayList<>(); // List to store IP addresses
         String sql = "SELECT source_ip FROM external_icmp_block ";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {

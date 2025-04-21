@@ -1,6 +1,7 @@
 package com.network.security.util;
 
 import java.nio.ByteBuffer;
+//import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -35,18 +36,18 @@ public class PacketUtils {
         }
     }
 
-    public static Map<String, Boolean> parseTCPFlags(int flags) {
-        Map<String, Boolean> flagMap = new HashMap<>();
-        flagMap.put("URG", (flags & 0x20) != 0);
-        flagMap.put("ACK", (flags & 0x10) != 0);
-        flagMap.put("PSH", (flags & 0x08) != 0);
-        flagMap.put("RST", (flags & 0x04) != 0);
-        flagMap.put("SYN", (flags & 0x02) != 0);
-        flagMap.put("FIN", (flags & 0x01) != 0);
+    public static List<String> parseTCPFlags(int flags) {
+        List<String> flagMap = new ArrayList<>(); 
+        if ((flags & 0x20) != 0) flagMap.add("URG");
+        if ((flags & 0x10) != 0) flagMap.add("ACK");
+        if ((flags & 0x08) != 0) flagMap.add("PSH");
+        if ((flags & 0x04) != 0) flagMap.add("RST");
+        if ((flags & 0x02) != 0) flagMap.add("SYN");
+        if ((flags & 0x01) != 0) flagMap.add("FIN"); 
         return flagMap;
     }
 
-    public static String parceProtocol(int protocol) {
+    public static String parseProtocol(int protocol) {
         Map<Integer, String> protocolMap = new HashMap<>();
         protocolMap.put(1, "ICMP");
         protocolMap.put(6, "TCP");

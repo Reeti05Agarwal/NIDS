@@ -5,10 +5,6 @@ import java.util.List;
 public class ExtICMPDetection {
     private List<String> exticmpIPAddress;
 
-    public ExtICMPDetection(List<String> exticmpIPAddress) {
-        this.exticmpIPAddress = exticmpIPAddress;
-    }
-
     public List<String> getExticmpIPAddress() {
         return exticmpIPAddress;
     }
@@ -17,9 +13,9 @@ public class ExtICMPDetection {
         this.exticmpIPAddress = exticmpIPAddress;
     }
 
-    public boolean detect(String packetIP) {
+    public boolean detect(String srcIP, String destIP) {
         for (String ip : exticmpIPAddress) {
-            if (packetIP.equalsIgnoreCase(ip)) {
+            if (srcIP.equalsIgnoreCase(ip) || destIP.equalsIgnoreCase(ip)) {
                 System.out.println("ICMP packet detected from external IP: " + exticmpIPAddress);
                 return true;
             }

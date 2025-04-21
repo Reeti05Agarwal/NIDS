@@ -21,38 +21,41 @@ public class BruteForceService {
     MYSQLconnection mysqlConnection;
     Connection conn = MYSQLconnection.getConnection();
 
-    public void loadBruteForce() {
-        long latestPacketID = PacketRetrieverDao.getLatestPacketID(); // Loading latest packet ID
-        Map<String, Object> packetInfo = PacketRetrieverDao.getPacketData(latestPacketID); // Loading packet data
+    public void loadBruteForce(Map<String, Object> packetInfo) {
+        try { 
+            Object srcPort = packetInfo.get("SRC_PORT"); 
+            Object dstPort = packetInfo.get("DST_PORT");
+            String srcIP = (String) packetInfo.get("SRC_IP");
 
-        Object srcPort = packetInfo.get("SRC_PORT"); 
-        Object dstPort = packetInfo.get("DST_PORT");
-        String srcIP = (String) packetInfo.get("SRC_IP");
+            int srcPortInt = Integer.parseInt(srcPort.toString()); 
+            int dstPortInt = Integer.parseInt(dstPort.toString());
+            String service = PacketUtils.parseGetService(srcPortInt, dstPortInt); // Get service name
+            if (service == null) return;
 
-        int srcPortInt = Integer.parseInt(srcPort.toString()); 
-        int dstPortInt = Integer.parseInt(dstPort.toString());
-        String service = PacketUtils.parseGetService(srcPortInt, dstPortInt); // Get service name
-        if (service == null) return;
+            bruteForceDao.loadBruteForceThresholds(conn, service); // Load thresholds from DB
 
-        bruteForceDao.loadBruteForceThresholds(conn, service); // Load thresholds from DB
+            long timestamp = System.currentTimeMillis() / 1000; // in seconds
+            addPacketTimestamp(service, srcIP, timestamp); // Add packet timestamp 
 
-        long timestamp = System.currentTimeMillis() / 1000; // in seconds
-        addPacketTimestamp(service, srcIP, timestamp); // Add packet timestamp 
+            List<Long> timestamps = packetTimestamps.get(getKey(service, srcIP));
+            cleanOldTimestamps(timestamps, timestamp); // Remove old ones beyond time window
 
-        List<Long> timestamps = packetTimestamps.get(getKey(service, srcIP));
-        cleanOldTimestamps(timestamps, timestamp); // Remove old ones beyond time window
+            int packetCount = timestamps.size();
+            int elapsedTime = (int) (timestamp - timestamps.get(0)); // seconds since first attempt
 
-        int packetCount = timestamps.size();
-        int elapsedTime = (int) (timestamp - timestamps.get(0)); // seconds since first attempt
+            if (bruteForceDetector == null) {
+                bruteForceDetector = new BruteForceDetector();
+            }        
+            boolean detected = bruteForceDetector.detect(packetCount, elapsedTime);
 
-        if (bruteForceDetector == null) {
-            bruteForceDetector = new BruteForceDetector();
-        }        
-        boolean detected = bruteForceDetector.detect(packetCount, elapsedTime);
-
-        if (detected) {
-            System.out.println("[" + service + "] Brute Force attack detected from IP: " + srcIP);
+            if (detected) {
+                System.out.println("[" + service + "] Brute Force attack detected from IP: " + srcIP);
+            }
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to load brute force detection data");
+            e.printStackTrace();
         }
+        
     
     }
 
