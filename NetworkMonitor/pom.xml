@@ -1,46 +1,81 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.network.security</groupId>
-  <artifactId>NetworkMonitor</artifactId>
-  <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>NetworkMonitor</name>
-  <url>http://maven.apache.org</url>
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.pcap4j</groupId>
-        <artifactId>pcap4j-core</artifactId>
-        <version>1.8.2</version>
-    </dependency>
-    <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-        <version>8.0.26</version>
-    </dependency>
-     
+<project xmlns:pom="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  </dependencies>x
-  <build>
+    <groupId>com.network.security</groupId>
+    <artifactId>NetworkMonitor</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>NetworkMonitor</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <!-- switch to Java 14+ so we can use switch expressions and resolve lambda overloads -->
+        <maven.compiler.source>14</maven.compiler.source>
+        <maven.compiler.target>14</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- testing -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- packet capture -->
+        <dependency>
+            <groupId>org.pcap4j</groupId>
+            <artifactId>pcap4j-core</artifactId>
+            <version>1.8.2</version>
+        </dependency>
+
+        <!-- MySQL connector -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.26</version>
+        </dependency>
+
+        <!-- charting -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+
+        <!-- modern Look & Feel -->
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
         <plugins>
-            <!-- Specify to the compiler we want Java 1.8 -->
+            <!-- compile with Java 14, exclude any ExtraPrograms packages -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <excludes>
+                        <!-- drop both possible locations of the old ExtraPrograms classes -->
+                        <exclude>com/network/security/ExtraPrograms/</exclude>
+                        <exclude>com/network/security/services/ExtraPrograms/</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 
-            <!-- Tell the JAR plugin which class is the main class -->
+            <!-- build normal JAR with specified main class -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -48,13 +83,13 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>com.github.username.App</mainClass>
+                            <mainClass>com.network.security.ui.ImprovedUI</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
             </plugin>
 
-            <!-- Embed dependencies inside the final JAR -->
+            <!-- shade to build an uber-jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -65,11 +100,11 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <finalName>uber-${project.artifactId}-${project.version}</finalName>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <finalName>uber-${project.artifactId}-${project.version}</finalName>
-                </configuration>
             </plugin>
         </plugins>
     </build>

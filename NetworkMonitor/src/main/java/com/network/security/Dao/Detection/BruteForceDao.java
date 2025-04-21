@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import com.network.security.Intrusion_detection.BruteForceDetector;
 
 public class BruteForceDao {
-    private BruteForceDetector bruteForceDetector;
+    BruteForceDetector bruteForceDetector;
 
  
 

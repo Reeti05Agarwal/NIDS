@@ -8,13 +8,7 @@ public class BruteForceDetector {
     private int brutePacketThreshold;
     private int bruteTimeWindow;
     private String severity;
-
-    // public BruteForceDetector(int brutePacketThreshold, int bruteTimeWindow) {
-    //     this.brutePacketThreshold = brutePacketThreshold;
-    //     this.bruteTimeWindow = bruteTimeWindow;
-    // }
-
-    // Getters and Setters
+ 
     public int getBrutePacketThreshold() {
         return brutePacketThreshold;
     }

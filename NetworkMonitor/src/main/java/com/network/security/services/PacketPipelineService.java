@@ -5,8 +5,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+
 
 import org.pcap4j.core.NotOpenException;
 import org.pcap4j.core.PacketListener;
@@ -49,7 +50,7 @@ import com.network.security.services.Detection.SusUserAgentService;
 
 
 public class PacketPipelineService {
-    private static final Logger LOGGER = Logger.getLogger(PacketPipelineService.class.getName());
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PacketPipelineService.class);
     private static final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     private static final BlockingQueue<byte[]> RawPacketQueue = new LinkedBlockingQueue<>(1000);
     private static final BlockingQueue<Map<String, Object>> StoringPacketQueue = new LinkedBlockingQueue<>();
@@ -66,11 +67,13 @@ public class PacketPipelineService {
             running = false;
             executorService.shutdownNow();
             System.out.println("Shutdown initiated...");
+            LOGGER.info("Shutdown initiated...");
         }));
 
         PacketListener listener = packet -> {
             try {
                 System.out.println("[DEBUG] Packet received...");
+                LOGGER.info("[DEBUG] Packet received...");
                 RawPacketQueue.put(packet.getRawData()); // Add raw data to queue
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -84,7 +87,8 @@ public class PacketPipelineService {
             try (PcapHandle handle = device.openLive(snapshotLength, PromiscuousMode.PROMISCUOUS, readTimeout);) {
                 handle.loop(-1, listener); // Capture indefinitely
             } catch (PcapNativeException | NotOpenException | InterruptedException e) {
-                LOGGER.log(Level.SEVERE, "Error during packet capture: ", e);
+ 
+                LOGGER.error("Error during packet capture: ", e);
             }
         });
 
@@ -93,8 +97,8 @@ public class PacketPipelineService {
         PacketRetriever retriever = new PacketRetriever(DetectionPacketQueue);
         DetectionDispatcher detector = new DetectionDispatcher(DetectionPacketQueue);
 
-        executorService.submit(packetproducer); // Submit producer to executor
-        executorService.submit(packetconsumer); // Submit consumer to executor        
+        executorService.submit(packetproducer);  
+        executorService.submit(packetconsumer);  
         executorService.submit(retriever);
         executorService.submit(detector);
     }
@@ -105,7 +109,7 @@ public class PacketPipelineService {
 class PacketProducer implements Runnable {
     private BlockingQueue<byte[]> RawPacketQueue;
     private BlockingQueue<Map<String, Object>> StoringPacketQueue;
-    private static final Logger LOGGER = Logger.getLogger(PacketProducer.class.getName());
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PacketProducer.class);
     PacketParserBuffer packetParser = new PacketParserBuffer();
 
     public PacketProducer(BlockingQueue<byte[]> RawPacketQueue, BlockingQueue<Map<String, Object>> StoringPacketQueue) {
@@ -127,7 +131,7 @@ class PacketProducer implements Runnable {
                 
                 StoringPacketQueue.put(parsedPacketData); // Add parsed data to the storing queue
                 System.out.println("[PRODUCER] Packet parsed and added to StoringPacketQueue: " + parsedPacketData);
-                LOGGER.log(Level.INFO, "[PRODUCER] Packet parsed: {0}", parsedPacketData);
+                LOGGER.info("[PRODUCER] Packet parsed and added to StoringPacketQueue: " + parsedPacketData);
 
             }
         } catch (InterruptedException e) {
@@ -138,7 +142,7 @@ class PacketProducer implements Runnable {
 
 class PacketConsumer implements Runnable {
     private BlockingQueue<Map<String, Object>> StoringPacketQueue;
-    private static final Logger LOGGER = Logger.getLogger(PacketConsumer.class.getName());
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PacketConsumer.class);
     PacketDao packetDao = new PacketDao();
     
     public PacketConsumer(BlockingQueue<Map<String, Object>> StoringPacketQueue) {
@@ -159,7 +163,7 @@ class PacketConsumer implements Runnable {
 
                 PacketDao.processPacket(PacketData); // Process the packet data
                 System.out.println("[CONSUMER] Packet processed and stored: " + PacketData);
-                LOGGER.log(Level.INFO, "[CONSUMER] Packet processed: {0}", PacketData);
+                LOGGER.info("[CONSUMER] Packet processed and stored: " + PacketData);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -170,7 +174,7 @@ class PacketConsumer implements Runnable {
 class PacketRetriever implements Runnable {
     private BlockingQueue<Map<String, Object>> detectionQueue;
     PacketRetriever packetRetriever;
-    private static final Logger LOGGER = Logger.getLogger(PacketRetriever.class.getName());
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PacketRetriever.class);
     
 
     public PacketRetriever(BlockingQueue<Map<String, Object>> detectionQueue) {
@@ -189,7 +193,7 @@ class PacketRetriever implements Runnable {
                     Map<String, Object> singlePacketMap = Map.of(packet.getKey(), packet.getValue());
                     detectionQueue.put(singlePacketMap);
                     System.out.println("[RETRIEVER] Packet fetched from DB and added to DetectionQueue");
-                    LOGGER.log(Level.INFO, "[RETRIEVER] Packet fetched from DB: {0}", singlePacketMap);
+                    LOGGER.info("[RETRIEVER] Packet fetched from DB and added to DetectionQueue: " + singlePacketMap);
                 }
 
                 sleepWithInterruptCheck(5000);
@@ -212,7 +216,7 @@ class PacketRetriever implements Runnable {
 class DetectionDispatcher implements Runnable {
     private BlockingQueue<Map<String, Object>> detectionQueue;
     private ExecutorService detectionServicePool;
-    private static final Logger LOGGER = Logger.getLogger(DetectionDispatcher.class.getName());
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DetectionDispatcher.class);
     
 
     // Inject your detection services
@@ -246,7 +250,7 @@ class DetectionDispatcher implements Runnable {
                 detectionServicePool.submit(() -> susUserAgentService.loadSuspiciousUserAgent(packetData));
 
                 System.out.println("[DETECTOR] Packet sent to detection services: " + packetData);
-                LOGGER.log(Level.INFO, "[DETECTOR] Packet sent to detection services: {0}", packetData);
+                LOGGER.info("[DETECTOR] Packet sent to detection services: " + packetData);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

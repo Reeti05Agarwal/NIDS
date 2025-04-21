@@ -6,11 +6,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/*
- * Prompts the user to select a network interface 
- * using NifSelector (Pcap4J’s GUI/CLI-based selector).
- */
-
 public class PacketSnifferService {
     private static final Logger LOGGER = Logger.getLogger(PacketSnifferService.class.getName());
     public PcapNetworkInterface getDevice() {
