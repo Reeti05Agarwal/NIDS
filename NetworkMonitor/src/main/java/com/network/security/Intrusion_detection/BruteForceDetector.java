@@ -1,15 +1,38 @@
 package com.network.security.Intrusion_detection;
 
-public class BruteForceDetector {
-    // Brute Force Detection
-    public static final int SSH_BRUTE_FORCE_THRESHOLD = 10; // SSH
-    public static final int FTP_BRUTE_FORCE_THRESHOLD = 10; // FTP
-    public static final int TELNET_BRUTE_FORCE_THRESHOLD = 10; // Telnet
-    public static final int HTTP_BRUTE_FORCE_THRESHOLD = 10; // HTTP
-    public static final int HTTPS_BRUTE_FORCE_THRESHOLD = 10; // HTTPS
-    public static final int SMTP_BRUTE_FORCE_THRESHOLD = 10; // SMTP
-    public static final int POP3_BRUTE_FORCE_THRESHOLD = 10; // POP3
-    public static final int IMAP_BRUTE_FORCE_THRESHOLD = 10; // IMAP
-    public static final int SNMP_BRUTE_FORCE_THRESHOLD = 10; // SNMP
+/*
+ * Holds threshold/time window and runs detection logic
+ */
 
+public class BruteForceDetector {
+    private int brutePacketThreshold;
+    private int bruteTimeWindow;
+
+    // public BruteForceDetector(int brutePacketThreshold, int bruteTimeWindow) {
+    //     this.brutePacketThreshold = brutePacketThreshold;
+    //     this.bruteTimeWindow = bruteTimeWindow;
+    // }
+
+    // Getters and Setters
+    public int getBrutePacketThreshold() {
+        return brutePacketThreshold;
+    }
+    public void setBrutePacketThreshold(int brutePacketThreshold) {
+        this.brutePacketThreshold = brutePacketThreshold;
+    }
+    public int getBruteTimeWindow() {
+        return bruteTimeWindow;
+    }
+    public void setBruteTimeWindow(int bruteTimeWindow) {
+        this.bruteTimeWindow = bruteTimeWindow;
+    }
+
+    // Method to detect brute force attacks based on packet count and time window
+    public boolean detect(int packetCount, int secondsElapsed) {
+        if (packetCount > brutePacketThreshold && secondsElapsed <= bruteTimeWindow) {
+            System.out.println("Brute force attack detected.");
+            return true;
+        }
+        return false;
+    }
 }

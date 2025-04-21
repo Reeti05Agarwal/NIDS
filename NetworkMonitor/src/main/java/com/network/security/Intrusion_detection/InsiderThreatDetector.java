@@ -1,19 +1,35 @@
 package com.network.security.Intrusion_detection;
 
 public class InsiderThreatDetector {
-    // Insider Threat Detection
-    
-    //Lateral Movement Detection
-    public static final int LATERAL_MOVEMENT_THRESHOLD = 100; // Example threshold for lateral movement detection
-    public static final int LATERAL_MOVEMENT_TIMEOUT = 1000; // Example timeout for lateral movement detection
+    private int insiderPacketThreshold;
+    private int insiderTimeWindow;
 
-    // Data Exfiltration Detection
-    public static final int DATA_EXFILTRATION_THRESHOLD = 100; // Example threshold for data exfiltration detection
-    public static final int DATA_EXFILTRATION_TIMEOUT = 1000; // Example timeout for data exfiltration detection
-    public static final int DATA_EXFILTRATION_INTERVAL = 1000; // Example interval for data exfiltration detection
+    public InsiderThreatDetector(int insiderPacketThreshold, int insiderTimeWindow) {
+        this.insiderPacketThreshold = insiderPacketThreshold;
+        this.insiderTimeWindow = insiderTimeWindow;
+    }
 
-    // Privilege Escalation Detection
-    public static final int PRIVILEGE_ESCALATION_THRESHOLD = 100; // Example threshold for privilege escalation detection
-    public static final int PRIVILEGE_ESCALATION_TIMEOUT = 1000; // Example timeout for privilege escalation detection
+    public int getInsiderPacketThreshold() {
+        return insiderPacketThreshold;
+    }
 
+    public void setInsiderPacketThreshold(int insiderPacketThreshold) {
+        this.insiderPacketThreshold = insiderPacketThreshold;
+    }
+
+    public int getInsiderTimeWindow() {
+        return insiderTimeWindow;
+    }
+
+    public void setInsiderTimeWindow(int insiderTimeWindow) {
+        this.insiderTimeWindow = insiderTimeWindow;
+    }
+
+    public boolean detect(String service, int failedAttemptsCounts, int seconds) {
+        if (failedAttemptsCounts > insiderPacketThreshold && seconds <= insiderTimeWindow) {
+            System.out.println("Insider threat detected on service: " + service);
+            return true;
+        }
+        return false;
+    }
 }
