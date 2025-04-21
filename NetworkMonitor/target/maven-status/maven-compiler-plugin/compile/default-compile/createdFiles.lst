@@ -54,6 +54,7 @@ com\network\security\Dao\Detection\DNSWebFilterDao.class
 com\network\security\Intrusion_detection\SuspiciousUserAgentDetection.class
 com\network\security\Dao\Detection\SuspiciousUserAgentDao.class
 com\network\security\Dao\Detection\InsiderThreatDao.class
+com\network\security\ui\MainFrame$TextAreaOutputStream.class
 com\network\security\Intrusion_detection\NonStandardPorts.class
 com\network\security\auth\Admin.class
 com\network\security\services\Detection\ExtICMPService.class

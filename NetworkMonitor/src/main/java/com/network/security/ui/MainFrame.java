@@ -6,6 +6,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -18,6 +21,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
 import org.jfree.chart.ChartFactory;
@@ -26,6 +30,7 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import com.network.security.auth.AuthManager;
+import com.network.security.services.AlertService;
 import com.network.security.services.PacketPipelineService;
 
 /**
@@ -41,6 +46,7 @@ public class MainFrame extends JFrame {
     private static final Color COLOR_BORDER = new Color(200, 200, 200);
 
     private final AuthManager auth;
+    private final AlertService alertService = new AlertService();
     private final CardLayout cardLayout = new CardLayout();
     private final JPanel cards = new JPanel(cardLayout);
 
@@ -75,15 +81,12 @@ public class MainFrame extends JFrame {
         cards.add(createAnalyticsPanel(), "Analytics");
 
         if (auth.isAdmin()) {
-            cards.add(new LogsPanel(), "Logs");
+            cards.add(createLogsPanel(), "Logs");
             cards.add(new BlockedIPPanel(), "Blocked IPs");
             cards.add(new RulesOverviewPanel(), "Rules Overview");
         }
 
-        JSplitPane split = new JSplitPane(
-                JSplitPane.HORIZONTAL_SPLIT,
-                nav, cards
-        );
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, nav, cards);
         split.setDividerLocation(SIDEBAR_WIDTH);
         split.setOneTouchExpandable(true);
         add(split, BorderLayout.CENTER);
@@ -131,6 +134,11 @@ public class MainFrame extends JFrame {
         JTextArea out = new JTextArea();
         out.setEditable(false);
 
+        // redirect System.out/err to JTextArea
+        TextAreaOutputStream taos = new TextAreaOutputStream(out);
+        System.setOut(new PrintStream(taos, true));
+        System.setErr(new PrintStream(taos, true));
+
         JToggleButton toggle = new JToggleButton("Start");
         toggle.setPreferredSize(BUTTON_SIZE);
         toggle.addActionListener(e -> {
@@ -170,12 +178,11 @@ public class MainFrame extends JFrame {
 
     private JPanel makeChartCard(String title) {
         DefaultCategoryDataset ds = new DefaultCategoryDataset();
-        ds.addValue(0, "Value", "X");  // placeholder, to be replaced with real data
+        ds.addValue(0, "Value", "X");
         ChartPanel chart = new ChartPanel(
                 ChartFactory.createBarChart(
-                        title, "Category", "Count",
-                        ds, PlotOrientation.VERTICAL,
-                        false, true, false
+                        title, "Category", "Count", ds,
+                        PlotOrientation.VERTICAL, false, true, false
                 )
         );
         JPanel wrap = new JPanel(new BorderLayout());
@@ -186,5 +193,42 @@ public class MainFrame extends JFrame {
         ));
         wrap.add(chart, BorderLayout.CENTER);
         return wrap;
+    }
+
+    // ── Logs Panel (admin‑only) ──────────────────────────────
+    private JPanel createLogsPanel() {
+        return new LogsPanel();
+    }
+
+    /**
+     * An OutputStream that appends incoming bytes into a JTextArea.
+     */
+    private static class TextAreaOutputStream extends OutputStream {
+
+        private final JTextArea textArea;
+        private final StringBuilder buffer = new StringBuilder();
+
+        TextAreaOutputStream(JTextArea ta) {
+            this.textArea = ta;
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            buffer.append((char) b);
+            if (b == '\n') {
+                final String text = buffer.toString();
+                SwingUtilities.invokeLater(() -> textArea.append(text));
+                buffer.setLength(0);
+            }
+        }
+
+        @Override
+        public void flush() throws IOException {
+            if (buffer.length() > 0) {
+                final String text = buffer.toString();
+                SwingUtilities.invokeLater(() -> textArea.append(text));
+                buffer.setLength(0);
+            }
+        }
     }
 }
