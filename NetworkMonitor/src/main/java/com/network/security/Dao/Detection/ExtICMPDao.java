@@ -18,8 +18,10 @@ public class ExtICMPDao {
     public void insertExtICMPDetection(Connection conn) {
         String sql = "INSERT INTO external_icmp_block (source_ip) VALUES (?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, extICMPDetection.getExticmpIPAddress());
-            stmt.executeUpdate();
+            for (String ipAddress : extICMPDetection.getExticmpIPAddress()) {
+                stmt.setString(1, ipAddress);
+                stmt.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to insert brute force detection rule");
             e.printStackTrace();

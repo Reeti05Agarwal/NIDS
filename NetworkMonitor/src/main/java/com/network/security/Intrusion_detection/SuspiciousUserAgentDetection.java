@@ -5,10 +5,6 @@ import java.util.List;
 public class SuspiciousUserAgentDetection {
     private List<String> sudKeyword;
 
-    public SuspiciousUserAgentDetection(List<String> sudKeyword) {
-        this.sudKeyword = sudKeyword;
-    }
-
     public List<String> getSudKeyword() {
         return sudKeyword;
     }

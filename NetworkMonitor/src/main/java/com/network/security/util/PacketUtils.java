@@ -62,16 +62,7 @@ public class PacketUtils {
         }
         return mac.substring(0, mac.length() - 1);
     }
-    
-    public static String parseProtocol(int protocol) {
-        Map<Integer, String> protocolMap = new HashMap<>();
-        protocolMap.put(1, "ICMP");
-        protocolMap.put(6, "TCP");
-        protocolMap.put(17, "UDP");
-        // Extend with other protocols as needed.
-        return protocolMap.getOrDefault(protocol, "UNKNOWN");
-
-    } 
+ 
 
     public static String parseHttpMethods(String packetStr) {
         String[] methods = { "GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS", "PATCH" };
@@ -79,6 +70,27 @@ public class PacketUtils {
             if (packetStr.contains(method)) {
                 return method;
             }
+        }
+        return null;
+    }
+
+    public static String parseGetService(int srcPort, int dstPort) {
+        if (srcPort == 80 || dstPort == 80) {
+            return "HTTP";
+        } else if (srcPort == 443 || dstPort == 443) {
+            return "HTTPS";
+        } else if (srcPort == 53 || dstPort == 53) {
+            return "DNS";
+        } else if (srcPort == 22 || dstPort == 22) {
+            return "SSH";
+        } else if (srcPort == 21 || dstPort == 21) {
+            return "FTP";
+        } else if (srcPort == 25 || dstPort == 25) {
+            return "SMTP";
+        } else if (srcPort == 110 || dstPort == 110) {
+            return "POP3";
+        } else if (srcPort == 143 || dstPort == 143) {
+            return "IMAP";
         }
         return null;
     }

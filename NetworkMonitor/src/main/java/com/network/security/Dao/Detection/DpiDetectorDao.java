@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.network.security.Intrusion_detection.DpiDetector;
 
@@ -14,8 +16,10 @@ public class DpiDetectorDao {
     public void insertDpiDetector(Connection conn) {
         String sql = "INSERT INTO dpi_keywords (keyword) VALUES (?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, dpiDetector.getKeyword());
-            stmt.executeUpdate();
+            for (String keyword : dpiDetector.getKeyword()) {
+                stmt.setString(1, keyword);
+                stmt.executeUpdate();
+            }
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to insert DPI detection rule");
             e.printStackTrace();
@@ -24,13 +28,15 @@ public class DpiDetectorDao {
 
     // Load the brute force detection thresholds from the database
     public void loadDpiDetector(Connection conn) {
+        List<String> keywords_list = new ArrayList<>();
         String sql = "SELECT keyword FROM dpi_keywords ";
         try (PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                dpiDetector.setKeyword(rs.getString("keyword"));
-             }
+                keywords_list.add(rs.getString("keyword"));
+            }
+            dpiDetector.setKeyword(keywords_list);
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load brute force thresholds");

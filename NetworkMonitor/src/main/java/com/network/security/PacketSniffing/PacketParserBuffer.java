@@ -340,12 +340,11 @@ public class PacketParserBuffer {
         // Checking for buffer overflow
         if (buffer.capacity() < offset + 8) return;
 
-        buffer.position(offset);
-        //int srcPort = buffer.getShort() & 0xFFFF;
-        //int destPort = buffer.getShort() & 0xFFFF; 
-        //packetData.put("UDP_SRC_PORT", srcPort);
-        //packetData.put("UDP_DEST_PORT", destPort); 
+        buffer.position(offset); 
+        //int length = buffer.getShort() & 0xFFFF;
         int checksum = buffer.getShort() & 0xFFFF;
+        //packetData.put("UDP_LENGTH", length);  // Includes both header (8 bytes) and payload
+        //packetData.put("UDP_HEADER_SIZE", 8);  // Always 8 bytes
         packetData.put("UDP_CHECKSUM", checksum);
          
         //COUNT FOT UDP PACKETS

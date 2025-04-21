@@ -5,19 +5,6 @@ public class DoSDetector {
     private int dosTimeWindow;
     private String dosAttackType;
 
-    public DoSDetector(int dosPacketThreshold, int dosTimeWindow) {
-        this.dosPacketThreshold = dosPacketThreshold;
-        this.dosTimeWindow = dosTimeWindow;
-    }
-
-    public boolean detect(int packetCount, int secondsElapsed) {
-        if (packetCount > dosPacketThreshold && secondsElapsed <= dosTimeWindow) {
-            System.out.println("DDoS attack detected.");
-            return true;
-        }
-        return false;
-    }
-
     public int getDosPacketThreshold() {
         return dosPacketThreshold;
     }
@@ -39,5 +26,11 @@ public class DoSDetector {
     }
     public void setDosAttackType(String dosAttackType) {
         this.dosAttackType = dosAttackType;
+    }
+
+    public boolean detect(int packetCount, int secondsElapsed) {
+        return packetCount > dosPacketThreshold && secondsElapsed <= dosTimeWindow; 
+             
+     
     }
 }

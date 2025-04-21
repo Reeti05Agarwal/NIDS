@@ -5,12 +5,6 @@ public class DNSWebFilterDetector {
     private int dnsWebFilterThreshold;
     private int dnsWebFilterTimeWindow;
 
-    public DNSWebFilterDetector(String dnsWebFilterPattern, int dnsWebFilterThreshold, int dnsWebFilterTimeWindow) {
-        this.dnsWebFilterPattern = dnsWebFilterPattern;
-        this.dnsWebFilterThreshold = dnsWebFilterThreshold;
-        this.dnsWebFilterTimeWindow = dnsWebFilterTimeWindow;
-    }
-
     public String getDnsWebFilterPattern() {
         return dnsWebFilterPattern;
     }
@@ -36,10 +30,6 @@ public class DNSWebFilterDetector {
     }
 
     public boolean detect(String dnsQuery, int queryCount, int secondsElapsed) {
-        if (dnsQuery.contains(dnsWebFilterPattern) && queryCount > dnsWebFilterThreshold && secondsElapsed <= dnsWebFilterTimeWindow) {
-            System.out.println("DNS Web Filter attack detected.");
-            return true;
-        }
-        return false;
+        return dnsQuery.contains(dnsWebFilterPattern) && queryCount > dnsWebFilterThreshold && secondsElapsed <= dnsWebFilterTimeWindow;
     }
 }
