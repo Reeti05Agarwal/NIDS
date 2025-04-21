@@ -1,7 +1,5 @@
 package com.network.security.services;
 
-import java.util.List;
-// import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -161,6 +159,7 @@ class PacketConsumer implements Runnable {
 
                 PacketDao.processPacket(PacketData); // Process the packet data
                 System.out.println("[CONSUMER] Packet processed and stored: " + PacketData);
+                LOGGER.log(Level.INFO, "[CONSUMER] Packet processed: {0}", PacketData);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -190,6 +189,7 @@ class PacketRetriever implements Runnable {
                     Map<String, Object> singlePacketMap = Map.of(packet.getKey(), packet.getValue());
                     detectionQueue.put(singlePacketMap);
                     System.out.println("[RETRIEVER] Packet fetched from DB and added to DetectionQueue");
+                    LOGGER.log(Level.INFO, "[RETRIEVER] Packet fetched from DB: {0}", singlePacketMap);
                 }
 
                 sleepWithInterruptCheck(5000);
@@ -246,6 +246,7 @@ class DetectionDispatcher implements Runnable {
                 detectionServicePool.submit(() -> susUserAgentService.loadSuspiciousUserAgent(packetData));
 
                 System.out.println("[DETECTOR] Packet sent to detection services: " + packetData);
+                LOGGER.log(Level.INFO, "[DETECTOR] Packet sent to detection services: {0}", packetData);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
