@@ -30,14 +30,25 @@ public class BruteForceService {
             String dstIP = (String) packetInfo.get("destIP");
 
             System.out.println("[BRUTE FORCE] " + srcIP);
-            //if (srcIP == null) return;
+            if (srcIP == null){
+                System.out.println("[BRUTE FORCE] IP ADDRESS NULL");
+                return;
+            } 
             System.out.println("[BRUTE FORCE] " + srcPort);
             System.out.println("[BRUTE FORCE] " + dstPort);
-            //if (srcPort == null && dstPort == null) return;
+            if (srcPort == null && dstPort == null) 
+            {
+                System.out.println("[BRUTE FORCE] PORTS NULL");
+                return;
+            }
 
             String service = PacketUtils.parseGetService(srcPort, dstPort); // SERVICE
             System.out.println(service);
-            if (service == null) return;
+            if (service == null)
+            {
+                System.out.println("[BRUTE FORCE] SERVICW NULL");
+                return;
+            } 
 
             
             if (conn == null) {

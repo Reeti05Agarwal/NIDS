@@ -36,16 +36,18 @@ public class PacketUtils {
         }
     }
 
-    public static List<String> parseTCPFlags(int flags) {
-        List<String> flagMap = new ArrayList<>(); 
+    public static String parseTCPFlags(int flags) {
+        List<String> flagMap = new ArrayList<>();
         if ((flags & 0x20) != 0) flagMap.add("URG");
         if ((flags & 0x10) != 0) flagMap.add("ACK");
         if ((flags & 0x08) != 0) flagMap.add("PSH");
         if ((flags & 0x04) != 0) flagMap.add("RST");
         if ((flags & 0x02) != 0) flagMap.add("SYN");
-        if ((flags & 0x01) != 0) flagMap.add("FIN"); 
-        return flagMap;
+        if ((flags & 0x01) != 0) flagMap.add("FIN");
+    
+        return String.join(", ", flagMap); // <-- This line converts list to comma-separated string
     }
+    
 
     public static String parseProtocol(int protocol) {
         Map<Integer, String> protocolMap = new HashMap<>();
@@ -120,13 +122,18 @@ public class PacketUtils {
     }
     
     
-    public static List<Integer> parseExtensionHeaders(ByteBuffer buffer, int offset, int nextHeader, Map<String, Object> packetData) {
-        List<Integer> extensionHeaders = new ArrayList<>();
-        
+    public static String parseExtensionHeaders(ByteBuffer buffer, int offset, int nextHeader, Map<String, Object> packetData) {
+        StringBuilder extensionHeadersStr = new StringBuilder();
+    
         while (isExtensionHeader(nextHeader)) {
-            if (offset + 2 > buffer.limit()) return extensionHeaders;
-            
-            extensionHeaders.add(nextHeader);
+            if (offset + 2 > buffer.limit()) break;
+    
+            // Append header to string
+            if (extensionHeadersStr.length() > 0) {
+                extensionHeadersStr.append(", ");
+            }
+            extensionHeadersStr.append(nextHeader);
+    
             int newNextHeader = buffer.get(offset) & 0xFF;
             int hdrExtLen = buffer.get(offset + 1) & 0xFF;
     
@@ -134,9 +141,10 @@ public class PacketUtils {
             offset += headerLength;
             nextHeader = newNextHeader;
         }
-        
-        return extensionHeaders;
+    
+        return extensionHeadersStr.toString();
     }
+    
 
     public static String decodePayload(byte[] tcpPayload) {
         StringBuilder decoded = new StringBuilder();

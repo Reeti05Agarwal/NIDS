@@ -43,6 +43,7 @@ public class PacketDao{
                 long packetID = -1;
                 if (rs.next()) {
                     packetID = rs.getLong(1);
+
                     
                     // Data Link Layer
                     insertLayer(conn, "INSERT INTO Data_Link_Layer (PacketID, srcMAC, destMAC, TYPE) VALUES (?, ?, ?, ?)", packetID, data.get("SRC_MAC"), data.get("DEST_MAC"), data.get("TYPE"));
@@ -78,7 +79,7 @@ public class PacketDao{
                         packetID, data.get("SRC_PORT"), data.get("DEST_PORT"));
                         switch (data.get("PROTOCOL").toString()) {
                             case "TCP":
-                                insertLayer(conn, "INSERT INTO TCP_Header (PacketID, SequenceNum, AckNum, WindowsSize, FLAGS, CHECKSUM, PAYLOAD) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                                insertLayer(conn, "INSERT INTO TCP_Header (PacketID, SequenceNum, AckNum, WindowsSize, Flags, CHECKSUM, PAYLOAD) VALUES (?, ?, ?, ?, ?, ?, ?)",
                                     packetID, data.get("SEQUENCE_NUM"), data.get("ACK_NUM"), data.get("WINDOW_SIZE"), data.get("TCP_FLAGS"), data.get("TCP_CHECKSUM"), data.get("TCP_PAYLOAD"));
                                 break;
                             case "UDP":

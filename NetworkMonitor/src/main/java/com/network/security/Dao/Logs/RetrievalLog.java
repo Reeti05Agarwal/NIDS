@@ -1,12 +1,14 @@
-package com.network.security.Dao;
+package com.network.security.Dao.Logs;
 
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
-import com.network.security.Dao.PacketRetrieverDao;  
+import com.network.security.Dao.PacketRetrieverDao; // Add this import if PacketRetrieverDao exists in this package
+ 
+
 import com.network.security.util.DBConnection;
 
-public class PacketRetrieverDao {
+public class RetrievalLog {
 
     public static void main(String[] args) {
         long latestPacketID = PacketRetrieverDao.getLatestPacketID();
@@ -31,12 +33,10 @@ public class PacketRetrieverDao {
     public static Map<String, Object> getPacketData(long packetID) {
         Map<String, Object> packetData = new HashMap<>();
         packetData.put("Packet_ID", packetID);
+        System.out.println("[PACKET RETRIEVER DAO] PACKET ID: " + packetID);
         packetData.put("Evaluated", 0);
 
-        
-
         try (Connection conn = DBConnection.getConnection()) {
-            conn.setAutoCommit(false);
 
             // Packet Metadata
             try (PreparedStatement stmt = conn.prepareStatement("SELECT * FROM Packet_Metadata WHERE PacketID = ?")) {
@@ -44,7 +44,9 @@ public class PacketRetrieverDao {
                 ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
                     packetData.put("TIMESTAMP", rs.getTimestamp("timestamp"));
+                    System.out.println("[PACKET RETRIEVER DAO] TIMESTAMP: " + packetData.get("TIMESTAMP"));
                     packetData.put("PACKET_SIZE", rs.getInt("payloadsize"));
+                    System.out.println("[PACKET RETRIEVER DAO] PACKET_SIZE: " + packetData.get("PACKET_SIZE"));
                 }
             }
 
@@ -52,14 +54,16 @@ public class PacketRetrieverDao {
             retrieveFields(conn, packetData, "Data_Link_Layer", packetID, "srcMAC", "destMAC", "TYPE");
 
 
-            String type = (String) packetData.get("TYPE"); 
+            String type = (String) packetData.get("TYPE");
+            System.out.println("[PACKET RETRIEVER DAO] TYPE: " + type);
             retrieveFields(conn, packetData, "Ethernet_Header", packetID, "ETH_TYPE");
             if (type == "WIFI"){
                 retrieveFields(conn, packetData, "WiFi_Header", packetID, "FRAME_CONTROL", "BSSID", "SEQ_CONTROL");
             }
 
             retrieveFields(conn, packetData, "Network_Layer", packetID, "srcIP", "destIP");
-            Integer ethType = (Integer) packetData.get("ETH_TYPE"); 
+            Integer ethType = (Integer) packetData.get("ETH_TYPE");
+            System.out.println("[PACKET RETRIEVER DAO] Eth_Type :" + ethType);
             if (ethType!=null){
                 switch (ethType) {
                     case 0x0800:
@@ -91,7 +95,10 @@ public class PacketRetrieverDao {
                         retrieveFields(conn, packetData, "ICMP_Header", packetID, "TYPE", "CODE", "CHECKSUM", "SEQUENCE_NUM");
                         break;
                 }
-            } 
+            }else{
+                System.out.println("[RETRIEVER] Protocol is NULL");
+            }
+            
 
             // Application Layer
             retrieveFields(conn, packetData, "Application_Layer", packetID, "App_Protocol");
@@ -108,14 +115,16 @@ public class PacketRetrieverDao {
                         retrieveFields(conn, packetData, "TLS_Header", packetID, "tls_version", "handshake_type", "ContentType");
                         break;
                 }
-            } 
-            conn.commit(); 
-             
+            }
+            
+            System.out.println("[PACKET RETRIEVER DAO] APP PROTOCOL: " + App_Protocol);
+            System.out.println("[PACKET RETRIEVER DAO] PACKET DATA: " + packetData);
+            
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return packetData;
-          
+        return packetData;   
     }
 
     private static void retrieveFields(Connection conn, Map<String, Object> map, String table, long packetID, String... fields) {
@@ -124,8 +133,9 @@ public class PacketRetrieverDao {
             query.append(fields[i]);
             if (i != fields.length - 1) query.append(", ");
         }
-        query.append(" FROM ").append(table).append(" WHERE PacketID = ?"); 
-
+        query.append(" FROM ").append(table).append(" WHERE PacketID = ?");
+        System.out.println("[PACKET RETRIEVER DAO] Query for Retrieval: " + query);
+    
         try (PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             stmt.setLong(1, packetID);
             ResultSet rs = stmt.executeQuery();

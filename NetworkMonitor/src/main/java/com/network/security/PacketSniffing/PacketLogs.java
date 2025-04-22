@@ -227,7 +227,7 @@ public static void main(String[] args) {
      packetData.put("HOP_LIMIT", buffer.get() & 0xFF); // Hop Limit
      System.out.println("[DEBUG] Hop Limit (IPv6 Header): " + packetData.get("HOP_LIMIT"));
      int nextHeader = buffer.get() & 0xFF; // Next Header        
-     List<Integer> extensionHeaders = PacketUtils.parseExtensionHeaders(buffer, offset + 40, nextHeader, packetData);
+     String extensionHeaders = PacketUtils.parseExtensionHeaders(buffer, offset + 40, nextHeader, packetData);
      packetData.put("EXTENSION_HEADERS", extensionHeaders);
      System.out.println("[DEBUG] Extension Headers (IPv6 Header): " + packetData.get("EXTENSION_HEADERS"));
      parseTransportLayer(buffer, offset + 40, nextHeader, packetData);

@@ -100,7 +100,7 @@ public class PacketParserBuffer {
             buffer.get(srcMac); 
             packetData.put("SRC_MAC", PacketUtils.bytesToMac(srcMac)); // Source MAC address (String)
             short ethType = buffer.getShort();
-            packetData.put("ETH_TPE", ethType);
+            packetData.put("ETH_TYPE", ethType);
             /*
             if (ethType > 0){
                 String ethTypeString = PacketUtils.parseEtherType(ethType);
@@ -213,7 +213,7 @@ public class PacketParserBuffer {
         packetData.put("HOP_LIMIT", buffer.get() & 0xFF); // Hop Limit
         int nextHeader = buffer.get() & 0xFF; // Next Header        
         // Process any extension headers (if present)
-        List<Integer> extensionHeaders = PacketUtils.parseExtensionHeaders(buffer, offset + 40, nextHeader, packetData);
+        String extensionHeaders = PacketUtils.parseExtensionHeaders(buffer, offset + 40, nextHeader, packetData);
         packetData.put("EXTENSION_HEADERS", extensionHeaders);
         parseTransportLayer(buffer, offset + 40, nextHeader, packetData);
     }
