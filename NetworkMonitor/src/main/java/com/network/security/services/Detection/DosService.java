@@ -71,6 +71,7 @@ public class DosService {
                     return;
                 }
                 doSDetectorDao.loadDoSDetector(conn, attackType);
+                System.out.println("Thresholds loaded");
 
                 if (packetCount==0 || timeElapsed == 0) return;
 

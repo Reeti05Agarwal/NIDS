@@ -37,6 +37,7 @@ public class DNSWebFilterDao {
                 dnsWebFilterDetector.setDnsWebFilterTimeWindow(rs.getInt("time_window_seconds"));
                 dnsWebFilterDetector.setSeverity(rs.getString("severity"));
             }
+            System.out.println("[DAO DNS WEB FILTER] Thresholds loaded");
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load DNS web filter thresholds");

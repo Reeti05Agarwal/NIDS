@@ -40,23 +40,23 @@ public class PacketParserBuffer {
      
         // Data Link Layer (Layer 2)
         parseEthernetHeader(buffer, packetData);// Ethernet Header
-        int ethType = ((Short) packetData.get("ETH_TYPE")) & 0xFFFF;
+        String ethType = (String) packetData.get("ETH_TYPE");
         
-        int offset = 0;  
-        if (packet[0] == 0x08 && packet[1] == 0x00) { // Check for Wi-Fi frame control field
-            parseWiFiHeader(buffer, packetData);
-            offset = 24; // Adjust offset for Wi-Fi header length
-        } else {
-            offset = 14; // Ethernet header length
-        }
+        int offset = 14;  
+        // if (packet[0] == 0x08 && packet[1] == 0x00) { // Check for Wi-Fi frame control field
+        //     parseWiFiHeader(buffer, packetData);
+        //     offset = 24; // Adjust offset for Wi-Fi header length
+        // } else {
+        //     offset = 14; // Ethernet header length
+        // }
 
         switch (ethType) {
-            case 0x0800: parseIPv4(buffer, offset, packetData); break;  // IPv4
-            case 0x86DD: parseIPv6(buffer, offset, packetData); break;  // IPv6
-            case 0x0806: parseARP(buffer, offset, packetData); break;   // ARP
+            case "IPv4": parseIPv4(buffer, offset, packetData); break;  // IPv4
+            case "IPv6": parseIPv6(buffer, offset, packetData); break;  // IPv6
+            case "ARP": parseARP(buffer, offset, packetData); break;   // ARP
             default:
-                LOGGER.log(Level.INFO, "Unsupported EtherType: {0}", Integer.toHexString(ethType));
-                packetData.put("INFO", "Unsupported EtherType: " + Integer.toHexString(ethType));         
+                LOGGER.log(Level.INFO, "Unsupported EtherType: {0}", ethType);
+                packetData.put("INFO", "Unsupported EtherType: " + ethType);         
         }
 
         return packetData;
@@ -83,10 +83,11 @@ public class PacketParserBuffer {
     
             byte[] srcMac = new byte[6];
             buffer.get(srcMac); 
-            packetData.put("SRC_MAC", PacketUtils.bytesToMac(srcMac)); // Source MAC address
+            packetData.put("SRC_MAC", PacketUtils.bytesToMac(srcMac)); // Source MAC address (String)
     
             short ethType = buffer.getShort(); 
-            packetData.put("ETH_TYPE", ethType); // EtherType
+            String eth_Type = PacketUtils.parseEtherType(ethType);
+            packetData.put("ETH_TYPE", eth_Type); // EtherType
         } catch (Exception e) {
             LOGGER.warning("Ethernet header parsing failed: " + e.getMessage());
         }
@@ -314,11 +315,11 @@ public class PacketParserBuffer {
         packetData.put("TCP_CHECKSUM", checksum);
          
 
-        if (dataOffset > 20) {
-            byte[] options = new byte[dataOffset - 20];
-            buffer.get(options);
-            packetData.put("TCP_OPTIONS", options);
-        }
+        // if (dataOffset > 20) {
+        //     byte[] options = new byte[dataOffset - 20];
+        //     buffer.get(options);
+        //     packetData.put("TCP_OPTIONS", options);
+        // }
     
         // Check if there's a TCP payload (application data)
         if (buffer.remaining() > 0) {

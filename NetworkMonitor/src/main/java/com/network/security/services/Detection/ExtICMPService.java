@@ -29,6 +29,7 @@ public class ExtICMPService {
                 return;
             }
             extICMPDao.loadICMPip(conn);
+            System.out.println("Thresholds loaded");
 
             if (extICMPDetection == null) {
                 extICMPDetection = new ExtICMPDetection();

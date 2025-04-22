@@ -2,6 +2,7 @@ package com.network.security.services;
 
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -27,29 +28,20 @@ import com.network.security.services.Detection.DosService;
 import com.network.security.services.Detection.DpiService;
 import com.network.security.services.Detection.ExtICMPService;
 import com.network.security.services.Detection.SusUserAgentService;
-//import com.network.security.services.Detection.MalwareService;
-
-
-/* 
- * Three Thread Running in Parallel
- * 1. Packet Sniffing (PacketSnifferService.java)
- * 2. Packet Parsing (PacketParserBuffer.java) :  takes packets from the queue and parses them
- * 3. Packet Storing (PacketStoring.java) : takes packets from the queue and processes them (e.g., stores them)
+ 
+/*
+ * Anonymous Thread 
+ * PacketProducer
+ * PacketConsumer
+ * PacketRetriever
+ * DetectionDispatcher
  * 
- * blocking queue:
- * 1. packetSniffing -> RawPacketQueue (BlockingQueue<byte[]>)
- * 2. packetParserBuffer -> StoringPacketQueue (BlockingQueue<Map<String, Object>>)
- * 
- * THINGS TO DO:
- * 2. InterruptedException Should Be Handled Properly
- * 3. Add error handling.
- * 4. Potential Memory Leak with Threads
+ * CountDownLatch to sequence thread startup
  */
-
 
 public class PacketPipelineService {
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PacketPipelineService.class);
-    private static final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(6);
     private static final BlockingQueue<byte[]> RawPacketQueue = new LinkedBlockingQueue<>(1000);
     private static final BlockingQueue<Map<String, Object>> StoringPacketQueue = new LinkedBlockingQueue<>();
     private static final BlockingQueue<Map<String, Object>> DetectionPacketQueue = new LinkedBlockingQueue<>();
@@ -73,6 +65,7 @@ public class PacketPipelineService {
                 System.out.println("[DEBUG] Packet received...");
                 LOGGER.info("[DEBUG] Packet received...");
                 RawPacketQueue.put(packet.getRawData()); // Add raw data to queue
+                Thread.sleep(100); 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -81,26 +74,74 @@ public class PacketPipelineService {
  
         int snapshotLength = 65536;
         int readTimeout = 50;  
+
+        CountDownLatch latch1 = new CountDownLatch(1);
+        CountDownLatch latch2 = new CountDownLatch(1);
+        CountDownLatch latch3 = new CountDownLatch(1);
+        CountDownLatch latch4 = new CountDownLatch(1);
+
+        // PacketProducer packetproducer = new PacketProducer(RawPacketQueue, StoringPacketQueue);
+        // PacketConsumer packetconsumer = new PacketConsumer(StoringPacketQueue);
+        // PacketRetriever retriever = new PacketRetriever(DetectionPacketQueue);
+        // DetectionDispatcher detector = new DetectionDispatcher(DetectionPacketQueue);
+
         executorService.submit(() -> {
-            try (PcapHandle handle = device.openLive(snapshotLength, PromiscuousMode.PROMISCUOUS, readTimeout);) {
-                handle.loop(-1, listener); // Capture indefinitely
-            } catch (PcapNativeException | NotOpenException | InterruptedException e) {
- 
-                LOGGER.error("Error during packet capture: ", e);
+            try (PcapHandle handle = device.openLive(snapshotLength, PromiscuousMode.PROMISCUOUS, readTimeout)) {
+                handle.loop(-1, listener); // Capture packets infinitely
+            } catch (Exception e) {
+                LOGGER.error("Error during packet capture", e);
+            } finally {
+                latch1.countDown(); // Signal producer to start
             }
         });
-
-        PacketProducer packetproducer = new PacketProducer(RawPacketQueue, StoringPacketQueue);
-        PacketConsumer packetconsumer = new PacketConsumer(StoringPacketQueue);
-        PacketRetriever retriever = new PacketRetriever(DetectionPacketQueue);
-        DetectionDispatcher detector = new DetectionDispatcher(DetectionPacketQueue);
-
-        executorService.submit(packetproducer);  
-        executorService.submit(packetconsumer);  
-        executorService.submit(retriever);
-        executorService.submit(detector);
+        
+        // 2. PacketProducer
+        executorService.submit(() -> {
+            try {
+                latch1.await(); // Wait for capture
+            } catch (InterruptedException ignored) {}
+            
+            executorService.submit(() -> {
+                new PacketProducer(RawPacketQueue, StoringPacketQueue).run(); // This runs forever
+            });
+            latch2.countDown(); // Signal consumer to start
+        });
+        
+        // 3. PacketConsumer
+        executorService.submit(() -> {
+            try {
+                latch2.await(); // Wait for producer
+            } catch (InterruptedException ignored) {}
+            
+            executorService.submit(() -> {
+                new PacketConsumer(StoringPacketQueue).run(); // Also runs forever
+            });
+            latch3.countDown(); // Signal retriever
+        });
+        
+        // 4. PacketRetriever
+        executorService.submit(() -> {
+            try {
+                latch3.await(); // Wait for consumer
+            } catch (InterruptedException ignored) {}
+            
+            executorService.submit(() -> {
+                new PacketRetriever(DetectionPacketQueue).run();
+            });
+            latch4.countDown(); // Signal detector
+        });
+        
+        // 5. DetectionDispatcher
+        executorService.submit(() -> {
+            try {
+                latch4.await(); // Wait for retriever
+            } catch (InterruptedException ignored) {}
+        
+            executorService.submit(() -> {
+                new DetectionDispatcher(DetectionPacketQueue).run();
+            });
+        });
     }
-
 
 }
 
@@ -159,9 +200,18 @@ class PacketConsumer implements Runnable {
                     continue;
                 }
 
-                PacketDao.processPacket(PacketData); // Process the packet data
-                System.out.println("[CONSUMER] Packet processed and stored: " + PacketData);
-                LOGGER.info("[CONSUMER] Packet processed and stored: " + PacketData);
+                //PacketDao.processPacket(PacketData); // Process the packet data
+                //System.out.println("[CONSUMER] Packet processed and stored: " + PacketData);
+                //LOGGER.info("[CONSUMER] Packet processed and stored: " + PacketData);
+                
+                try{
+                    PacketDao.processPacket(PacketData); // Process the packet data
+                    System.out.println("[CONSUMER] Packet processed and stored: " + PacketData);
+                    LOGGER.info("[CONSUMER] Packet processed and stored: " + PacketData);
+                }catch (Exception e){
+                    System.out.println("[ERROR] problem with packet dao");
+                } 
+                
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -181,12 +231,17 @@ class PacketRetriever implements Runnable {
 
     @Override
     public void run() {
+        System.out.println("[RETRIEVER] Thread Started");
         try {
             while (PacketPipelineService.running) {
+                System.out.println("[RETRIEVER]");
                 // simulate polling every 5 seconds, or poll only unprocessed packets
+             
                 long latestPacketID = PacketRetrieverDao.getLatestPacketID(); // Loading latest packet ID
-                Map<String, Object> packetInfo = PacketRetrieverDao.getPacketData(latestPacketID); // Loading packet data
                 System.out.println("[RETRIEVER] Fetching packet with ID: " + latestPacketID);
+
+                Map<String, Object> packetInfo = PacketRetrieverDao.getPacketData(latestPacketID); // Loading packet data
+                
                 LOGGER.info("[RETRIEVER] Fetching packet with ID: " + latestPacketID);
 
                 for (Map.Entry<String, Object> packet : packetInfo.entrySet()) {
@@ -199,7 +254,9 @@ class PacketRetriever implements Runnable {
                 sleepWithInterruptCheck(5000);
             }
         } catch (InterruptedException e) {
+            System.out.println("[ERROR RETRIEVER] ");
             Thread.currentThread().interrupt();
+            
         }
     }
 
@@ -230,17 +287,20 @@ class DetectionDispatcher implements Runnable {
 
     public DetectionDispatcher(BlockingQueue<Map<String, Object>> detectionQueue) {
         this.detectionQueue = detectionQueue;
-        this.detectionServicePool = Executors.newFixedThreadPool(5); // 5 detection services in parallel
+        this.detectionServicePool = Executors.newFixedThreadPool(6); // 5 detection services in parallel
     }
 
     @Override
     public void run() {
+        System.out.println("[DETECTOR] Thread Started");
         try {
             while (PacketPipelineService.running) {
+                System.out.println("[DETECTOR]");
                 Map<String, Object> packetData = detectionQueue.take();
                 System.out.println("[DETECTOR] Retrieved packet from queue: " + packetData);
                 LOGGER.info("[DETECTOR] Retrieved packet from queue: " + packetData);
 
+                
                 detectionServicePool.submit(() -> bruteForceService.loadBruteForce(packetData));
                 detectionServicePool.submit(() -> dnsWebFilterService.loadDnsWebFilterRules(packetData));
                 detectionServicePool.submit(() -> dosService.loadDosService(packetData));
@@ -248,11 +308,12 @@ class DetectionDispatcher implements Runnable {
                 detectionServicePool.submit(() -> extICMPService.loadICMPRules(packetData));
                 //detectionServicePool.submit(() -> malwareService.loadMalwareSig(packetData));
                 detectionServicePool.submit(() -> susUserAgentService.loadSuspiciousUserAgent(packetData));
-
+                
                 System.out.println("[DETECTOR] Packet sent to detection services: " + packetData);
                 LOGGER.info("[DETECTOR] Packet sent to detection services: " + packetData);
             }
         } catch (InterruptedException e) {
+            System.out.println("[ERROR DETECTOR] ");
             Thread.currentThread().interrupt();
         }
     }

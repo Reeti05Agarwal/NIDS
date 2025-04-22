@@ -33,6 +33,7 @@ public class DpiService {
                 return;
             }
             dpiDetectorDao.loadDpiDetector(conn);
+            System.out.println("Thresholds loaded");
             boolean detected = dpiDetector.detect(payload);  
 
             if (detected) {

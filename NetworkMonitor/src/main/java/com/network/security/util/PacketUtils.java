@@ -96,6 +96,22 @@ public class PacketUtils {
         return null;
     }
 
+    public static String parseEtherType(short ethType){
+        if (ethType==0x0800){
+            return "IPv4";
+        }
+        else if (ethType==0x86DD){
+            return "IPv6";
+        }
+        else if (ethType==0x0806){
+            return "ARP";
+        }
+        else{
+            return "UNSUPPORTED";
+        }
+
+    }
+
     public static String parseHttpStatus(int status) {
         Map<Integer, String> httpStatusMap = new HashMap<>();
         httpStatusMap.put(200, "OK");

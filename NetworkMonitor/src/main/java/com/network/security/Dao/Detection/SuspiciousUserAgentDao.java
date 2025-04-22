@@ -38,6 +38,7 @@ public class SuspiciousUserAgentDao {
             }
             suspiciousUserAgentDetection.setSudKeyword(agents);
             suspiciousUserAgentDetection.setSeverity(rs.getString("severity"));
+            System.out.println("[DAO SUS USER AGENT] Thresholds loaded");
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load brute force thresholds");

@@ -46,7 +46,8 @@ public class SusUserAgentService {
                     LOGGER.error("[CONN ERROR] Database connection is null");
                     return;
                 }
-                susUserAgentDao.loadSuspiciousUserAgent(conn);  
+                susUserAgentDao.loadSuspiciousUserAgent(conn); 
+                System.out.println("Thresholds loaded"); 
 
                 if (susUserAgentDetection == null) {
                     susUserAgentDetection = new SuspiciousUserAgentDetection();

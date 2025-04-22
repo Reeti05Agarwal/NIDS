@@ -8,9 +8,7 @@ import com.network.security.Intrusion_detection.BruteForceDetector;
 
 public class BruteForceDao {
     BruteForceDetector bruteForceDetector;
-
- 
-
+    
     // Insert a new brute force detection rule into the database
     public void insertBruteForceRule(Connection conn, String service, int threshold, int timeWindow) {
         String sql = "INSERT INTO brute_force_rules (service, failed_attempt_threshold, time_window_sec) VALUES (?, ?, ?)";
@@ -37,6 +35,7 @@ public class BruteForceDao {
                 bruteForceDetector.setBruteTimeWindow(rs.getInt("time_window_sec"));
                 bruteForceDetector.setSeverity(rs.getString("severity"));
             }
+            System.out.println("[DAO BRUTE FORCE] Thresholds loaded");
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load brute force thresholds");

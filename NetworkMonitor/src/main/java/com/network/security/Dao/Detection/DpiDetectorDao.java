@@ -38,6 +38,7 @@ public class DpiDetectorDao {
             }
             dpiDetector.setKeyword(keywords_list);
             dpiDetector.setSeverity(rs.getString("severity"));
+            System.out.println("[DAO DPI KEYWORD] Thresholds loaded");
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load brute force thresholds");

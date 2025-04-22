@@ -20,7 +20,7 @@ public class DNSWebFilterService {
     // Load DNS Web Filter rules from the database and set them in the detector
     public void loadDnsWebFilterRules(Map<String, Object> packetInfo) {
         try { 
-            System.out.println("[DNS WEB FILTER] Starting DNS Web Filter Function");
+            
             String domain = (String) packetInfo.get("HOST_HEADER");  
             if (domain == null) return;
             String srcIP = (String) packetInfo.get("SRC_IP");
@@ -31,7 +31,8 @@ public class DNSWebFilterService {
             
             Integer queryCount = (Integer) packetInfo.getOrDefault("QUERY_COUNT", 1); // Example field for how often it was queried
             Integer secondsElapsed = (Integer) packetInfo.getOrDefault("TIME_ELAPSED", 1); // Example field for time elapsed
-    
+            
+            System.out.println("[DNS WEB FILTER] Starting DNS Web Filter Function");
             // Load threshold rules based on domain pattern
             if (conn == null) {
                 System.out.println("[CONN ERROR] Database connection is null");
@@ -39,6 +40,8 @@ public class DNSWebFilterService {
                 return;
             }
             dnsWebFilterDao.loadDnsWebFilterThreshold(conn, domain);
+            System.out.println("Thresholds loaded");
+            
             
             boolean detected =  dnsWebFilterDetector.detect(domain, queryCount, secondsElapsed);
             // Run detection logic

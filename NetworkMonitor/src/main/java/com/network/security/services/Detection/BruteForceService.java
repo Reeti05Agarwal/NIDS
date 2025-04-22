@@ -24,22 +24,29 @@ public class BruteForceService {
         try { 
             System.out.println("[BRUTE FORCE] Starting Brute Force Detection Function");
             Integer srcPort = (Integer) packetInfo.get("SRC_PORT"); 
+            
             Integer dstPort = (Integer) packetInfo.get("DST_PORT");
             String srcIP = (String) packetInfo.get("SRC_IP");
             String dstIP = (String) packetInfo.get("DST_IP");
 
-            if (srcIP == null) return;
-            if (srcPort == null && dstPort == null) return;
+            System.out.println("[BRUTE FORCE] " + srcIP);
+            //if (srcIP == null) return;
+            System.out.println("[BRUTE FORCE] " + srcPort);
+            System.out.println("[BRUTE FORCE] " + dstPort);
+            //if (srcPort == null && dstPort == null) return;
 
             String service = PacketUtils.parseGetService(srcPort, dstPort); // SERVICE
+            System.out.println(service);
             if (service == null) return;
 
+            
             if (conn == null) {
                 System.out.println("[CONN ERROR] Database connection is null");
                 LOGGER.error("[CONN ERROR] Database connection is null");
                 return;
             }
             bruteForceDao.loadBruteForceThresholds(conn, service); 
+            System.out.println("Thresholds loaded for SSH brute force detection.");
             LOGGER.info("Thresholds loaded for SSH brute force detection.");
 
             long timestamp = System.currentTimeMillis() / 1000; 

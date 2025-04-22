@@ -40,6 +40,7 @@ public class ExtICMPDao {
             }
             extICMPDetection.setExticmpIPAddress(ipList);
             extICMPDetection.setSeverity(rs.getString("severity"));
+            System.out.println("[DAO EXTERNAL ICMP] Thresholds loaded");
 
         } catch (SQLException e) {
             System.err.println("[ERROR] Failed to load brute force thresholds");
