@@ -45,25 +45,30 @@ public class PacketDao{
                     packetID = rs.getLong(1);
                     
                     // Data Link Layer
-                    insertLayer(conn, "INSERT INTO Data_Link_Layer (PacketID, srcMAC, destMAC) VALUES (?, ?, ?)", packetID, data.get("SRC_MAC"), data.get("DEST_MAC"));
-                    
+                    insertLayer(conn, "INSERT INTO Data_Link_Layer (PacketID, srcMAC, destMAC, TYPE) VALUES (?, ?, ?, ?)", packetID, data.get("SRC_MAC"), data.get("DEST_MAC"), data.get("TYPE"));
+                    String type = (String) data.get("TYPE");
+                    switch (type) {
+                        case "WIFI":
+                            insertLayer(conn, "INSERT INTO WiFi_Header (PacketID, FRAME_CONTROL, BSSID, SEQ_CONTROL) VALUES (?, ?, ?, ?)",
+                            packetID, data.get("WIFI_FRAME_CONTROL"), data.get("BSSID"), data.get("SEQ_CONTROL"));
+                    }
                     insertLayer(conn, "INSERT INTO Ethernet_Header (PacketID, ETH_TYPE) VALUES (?, ?)", packetID, data.get("ETH_TYPE")); 
 
                     // Network Layer
                     insertLayer(conn, "INSERT INTO Network_Layer (PacketID, srcIP, destIP) VALUES (?, ?, ?)", packetID, data.get("SRC_IP"), data.get("DEST_IP"));
-                    String ethType = (String) data.get("ETH_TYPE");
+                    int ethType = ((Short) data.get("ETH_TYPE")) & 0xFFFF;
                     switch (ethType) {
-                        case "IPv4":
+                        case 0x0800:
                             insertLayer(conn, "INSERT INTO IPv4_Header (PacketID, IP_VERSION, IP_FLAGS, TTL, CHECKSUM, PROTOCOL, FragmentOffset) VALUES (?, ?, ?, ?, ?, ?, ?)",
                             packetID, data.get("IP_VERSION"), data.get("IP_FLAGS"), data.get("TTL"), data.get("IP_CHECKSUM"), data.get("PROTOCOL"), data.get("FRAGMENT_OFFSET"));
                             break;
-                        case "IPv6":
-                            insertLayer(conn, "INSERT INTO IPv6_Header (PacketID, IP_VERSION, TRAFFIC_CLASS, HOP_LIMIT, FLOW_LABEL, EXTENSIONHEADERS) VALUES (?, ?, ?, ?, ?, ?)",
-                            packetID, data.get("IP_VERSION"), data.get("TRAFFIC_CLASS"), data.get("HOP_LIMIT"), data.get("FLOW_LABEL"), data.get("EXTENSION_HEADERS"));
-                            break;
-                        case "ARP":
+                        case 0x0806:
                             insertLayer(conn, "INSERT INTO ARP_Header (PacketID, HTYPE, PTYPE, HLEN, PLEN, OPER, ARP_OPERATION) VALUES (?, ?, ?, ?, ?, ?, ?)",
                             packetID, data.get("HTYPE"), data.get("PTYPE"), data.get("HLEN"), data.get("PLEN"), data.get("OPER"), data.get("ARP_OPERATION"));
+                            break;
+                        case 0x86DD:
+                            insertLayer(conn, "INSERT INTO IPv6_Header (PacketID, IP_VERSION, TRAFFIC_CLASS, HOP_LIMIT, FLOW_LABEL, EXTENSIONHEADERS) VALUES (?, ?, ?, ?, ?, ?)",
+                            packetID, data.get("IP_VERSION"), data.get("TRAFFIC_CLASS"), data.get("HOP_LIMIT"), data.get("FLOW_LABEL"), data.get("EXTENSION_HEADERS"));
                             break;
                     }
 

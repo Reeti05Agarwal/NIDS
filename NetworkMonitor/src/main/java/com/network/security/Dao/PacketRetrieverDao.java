@@ -33,29 +33,35 @@ public class PacketRetrieverDao {
             }
 
             // Data Link Layer
-            retrieveFields(conn, packetData, "Data_Link_Layer", packetID, "srcMAC", "destMAC");
-            retrieveFields(conn, packetData, "Ethernet_Header", packetID, "ETH_TYPE");
-            String ethType = (String) packetData.get("ETH_TYPE");
-            System.out.println("[RETRIEVER] Eth_Type" + ethType);
-            if (ethType != null) {
-                switch (ethType) {
-                    case "IPv4":
-                        retrieveFields(conn, packetData, "IPv4_Header", packetID, "IP_VERSION", "IP_FLAGS", "TTL", "CHECKSUM", "PROTOCOL");
-                        break;
-                    case "IPv6":
-                        retrieveFields(conn, packetData, "IPv6_Header", packetID, "IP_VERSION", "TRAFFIC_CLASS", "HOP_LIMIT", "FLOW_LABEL", "EXTENSIONHEADERS");
-                        break;
-                    case "ARP":
-                        retrieveFields(conn, packetData, "ARP_Header", packetID, "HTYPE", "PTYPE", "HLEN", "PLEN", "OPER", "ARP_OPERATION");
-                        break;
-                    default:
-                        System.out.println("Unknown ETH_TYPE: " + ethType);
-                        
+            retrieveFields(conn, packetData, "Data_Link_Layer", packetID, "srcMAC", "destMAC", "TYPE");
 
-                }
-            } else {
-                return packetData;
+
+            String type = (String) packetData.get("TYPE");
+            retrieveFields(conn, packetData, "Ethernet_Header", packetID, "ETH_TYPE");
+            if (type == "WIFI"){
+                retrieveFields(conn, packetData, "WiFi_Header", packetID, "FRAME_CONTROL", "BSSID", "SEQ_CONTROL");
             }
+
+            retrieveFields(conn, packetData, "Network_Layer", packetID, "srcIP", "destIP");
+            int ethType = ((Short) packetData.get("ETH_TYPE")) & 0xFFFF;
+            System.out.println("[RETRIEVER] Eth_Type :" + ethType);
+            
+            switch (ethType) {
+                case 0x0800:
+                    retrieveFields(conn, packetData, "IPv4_Header", packetID, "IP_VERSION", "IP_FLAGS", "TTL", "CHECKSUM", "PROTOCOL", "FragmentOffset");
+                    break;
+                case 0x86DD:
+                    retrieveFields(conn, packetData, "IPv6_Header", packetID, "IP_VERSION", "TRAFFIC_CLASS", "HOP_LIMIT", "FLOW_LABEL", "EXTENSIONHEADERS");
+                    break;
+                case 0x0806:
+                    retrieveFields(conn, packetData, "ARP_Header", packetID, "HTYPE", "PTYPE", "HLEN", "PLEN", "OPER", "ARP_OPERATION");
+                    break;
+                default:
+                    System.out.println("Unknown ETH_TYPE: " + ethType);
+                    
+
+            }
+            
 
             // Transport Layer
             retrieveFields(conn, packetData, "Transport_Layer", packetID, "srcPort", "destPort");
@@ -84,10 +90,10 @@ public class PacketRetrieverDao {
                 case "HTTP": 
                     retrieveFields(conn, packetData, "HTTP_Header", packetID, "HTTP_METHOD", "HOST", "user_agent", "Auth", "ContentType");
                     break;    
-                case "HTTPS":
+                case "DNS":
                     retrieveFields(conn, packetData, "DNS_Header", packetID, "query_type", "response_code", "TransactionID", "Flags", "Question");
                     break;    
-                case "DNS":
+                case "HTTPS":
                     retrieveFields(conn, packetData, "TLS_Header", packetID, "tls_version", "handshake_type", "ContentType");
                     break;
             }
@@ -106,21 +112,55 @@ public class PacketRetrieverDao {
             if (i != fields.length - 1) query.append(", ");
         }
         query.append(" FROM ").append(table).append(" WHERE PacketID = ?");
-
+    
         try (PreparedStatement stmt = conn.prepareStatement(query.toString())) {
             stmt.setLong(1, packetID);
             ResultSet rs = stmt.executeQuery();
+    
             if (rs.next()) {
+                ResultSetMetaData meta = rs.getMetaData();
                 for (String field : fields) {
-                    map.put(field, rs.getObject(field));
+                    int columnIndex = rs.findColumn(field);
+                    int columnType = meta.getColumnType(columnIndex);
+    
+                    Object value;
+    
+                    switch (columnType) {
+                        case Types.VARCHAR: 
+                            value = rs.getString(field);
+                            break;
+    
+                        case Types.INTEGER:
+                            value = rs.getInt(field);
+                            if (rs.wasNull()) value = null;
+                            break;
+
+    
+                        case Types.BIGINT:
+                            value = rs.getLong(field);
+                            if (rs.wasNull()) value = null;
+                            break;
+    
+                        case Types.TIMESTAMP:
+                        case Types.TIMESTAMP_WITH_TIMEZONE:
+                            value = rs.getTimestamp(field);
+                            break;
+
+                        default:
+                            value = rs.getObject(field); // fallback for unhandled types
+                            break;
+                    }
+    
+                    map.put(field, value);
                 }
             }
         } catch (SQLException e) {
             System.err.println("Error retrieving from " + table + ": " + e.getMessage());
         }
     }
+    
 
-    // Optionally, fetch the latest PacketID
+    
     public static long getLatestPacketID() {
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();

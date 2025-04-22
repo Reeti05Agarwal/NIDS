@@ -18,12 +18,12 @@ public class SusUserAgentService {
     public void loadSuspiciousUserAgent(Map<String, Object> packetInfo) {
         try {
             System.out.println("[SUS USER AGENT] Starting Suspicious User Agent Detection Function");
-            Integer srcPort = (Integer) packetInfo.get("SRC_PORT"); 
+            Integer srcPort = (Integer) packetInfo.get("srcPort"); 
             if (srcPort == null) return;
-            Integer dstPort = (Integer) packetInfo.get("DST_PORT");
-            String srcIP = (String) packetInfo.get("SRC_IP");
+            Integer dstPort = (Integer) packetInfo.get("destPort");
+            String srcIP = (String) packetInfo.get("srcIP");
             if (srcIP == null) return;
-            String dstIP = (String) packetInfo.get("DST_IP");
+            String dstIP = (String) packetInfo.get("destIP");
             String protocol = (String) packetInfo.getOrDefault("PROTOCOL", "ICMP");
             
             if (srcPort == -1) {
@@ -38,7 +38,7 @@ public class SusUserAgentService {
              
             // Check if the packet is HTTP
             if ("HTTP".equals(PacketUtils.parseGetService(srcPort, dstPort))){
-                String userAgent = (String) packetInfo.get("USER_AGENT");  
+                String userAgent = (String) packetInfo.get("user_agent");  
                 if (userAgent == null) return; 
 
                 if (conn == null) {

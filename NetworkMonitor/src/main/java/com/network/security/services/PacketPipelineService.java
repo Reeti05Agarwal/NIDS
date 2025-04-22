@@ -2,7 +2,7 @@ package com.network.security.services;
 
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
+//import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -75,16 +75,29 @@ public class PacketPipelineService {
         int snapshotLength = 65536;
         int readTimeout = 50;  
 
-        CountDownLatch latch1 = new CountDownLatch(1);
-        CountDownLatch latch2 = new CountDownLatch(1);
-        CountDownLatch latch3 = new CountDownLatch(1);
-        CountDownLatch latch4 = new CountDownLatch(1);
+        // CountDownLatch latch1 = new CountDownLatch(1);
+        // CountDownLatch latch2 = new CountDownLatch(1);
+        // CountDownLatch latch3 = new CountDownLatch(1);
+        // CountDownLatch latch4 = new CountDownLatch(1);
 
         // PacketProducer packetproducer = new PacketProducer(RawPacketQueue, StoringPacketQueue);
         // PacketConsumer packetconsumer = new PacketConsumer(StoringPacketQueue);
         // PacketRetriever retriever = new PacketRetriever(DetectionPacketQueue);
         // DetectionDispatcher detector = new DetectionDispatcher(DetectionPacketQueue);
 
+        executorService.submit(() -> {
+            try (PcapHandle handle = device.openLive(snapshotLength, PromiscuousMode.PROMISCUOUS, readTimeout);) {
+                handle.loop(-1, listener); // Capture indefinitely
+            } catch (PcapNativeException | NotOpenException | InterruptedException e) {
+                 
+            }
+        });
+        executorService.submit(new PacketProducer(RawPacketQueue, StoringPacketQueue)); 
+        executorService.submit(new PacketConsumer(StoringPacketQueue)); 
+        executorService.submit(new PacketRetriever(DetectionPacketQueue));
+        executorService.submit(new DetectionDispatcher(DetectionPacketQueue));
+
+        /*
         executorService.submit(() -> {
             try (PcapHandle handle = device.openLive(snapshotLength, PromiscuousMode.PROMISCUOUS, readTimeout)) {
                 handle.loop(-1, listener); // Capture packets infinitely
@@ -141,6 +154,7 @@ public class PacketPipelineService {
                 new DetectionDispatcher(DetectionPacketQueue).run();
             });
         });
+         */
     }
 
 }
@@ -239,10 +253,10 @@ class PacketRetriever implements Runnable {
              
                 long latestPacketID = PacketRetrieverDao.getLatestPacketID(); // Loading latest packet ID
                 System.out.println("[RETRIEVER] Fetching packet with ID: " + latestPacketID);
-
-                Map<String, Object> packetInfo = PacketRetrieverDao.getPacketData(latestPacketID); // Loading packet data
-                
                 LOGGER.info("[RETRIEVER] Fetching packet with ID: " + latestPacketID);
+                Map<String, Object> packetInfo = PacketRetrieverDao.getPacketData(latestPacketID); // Loading packet data
+                System.out.println("[RETRIEVER] Packet Fetched: " + packetInfo);
+
 
                 for (Map.Entry<String, Object> packet : packetInfo.entrySet()) {
                     Map<String, Object> singlePacketMap = Map.of(packet.getKey(), packet.getValue());

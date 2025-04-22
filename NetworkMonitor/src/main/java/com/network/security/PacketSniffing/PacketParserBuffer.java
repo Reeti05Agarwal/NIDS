@@ -40,25 +40,40 @@ public class PacketParserBuffer {
      
         // Data Link Layer (Layer 2)
         parseEthernetHeader(buffer, packetData);// Ethernet Header
-        String ethType = (String) packetData.get("ETH_TYPE");
+        /*
+        Short ethType = (Short) packetData.get("Eth_Type_Short");
+        String ethTypeString = (String) packetData.get("ETH_TYPE");
         
-        int offset = 14;  
-        // if (packet[0] == 0x08 && packet[1] == 0x00) { // Check for Wi-Fi frame control field
-        //     parseWiFiHeader(buffer, packetData);
-        //     offset = 24; // Adjust offset for Wi-Fi header length
-        // } else {
-        //     offset = 14; // Ethernet header length
-        // }
-
+        int offset = 0;  
+        if (ethType < 0) { // Check for Wi-Fi frame control field
+            packetData.put("TYPE", "WIFI");
+            parseWiFiHeader(buffer, packetData);
+            offset = 24; // Adjust offset for Wi-Fi header length
+        } else {
+            packetData.put("TYPE", "ETH");
+            offset = 14; // Ethernet header length
+        }
+         */
+        int ethType = ((Short) packetData.get("ETH_TYPE")) & 0xFFFF;
+        
+        int offset = 0;  
+        if (packet[0] == 0x08 && packet[1] == 0x00) { // Check for Wi-Fi frame control field
+            parseWiFiHeader(buffer, packetData);
+            packetData.put("TYPE", "WIFI");
+            offset = 24; // Adjust offset for Wi-Fi header length
+        } else {
+            offset = 14; // Ethernet header length
+            packetData.put("TYPE", "ETH");
+        }
         switch (ethType) {
-            case "IPv4": parseIPv4(buffer, offset, packetData); break;  // IPv4
-            case "IPv6": parseIPv6(buffer, offset, packetData); break;  // IPv6
-            case "ARP": parseARP(buffer, offset, packetData); break;   // ARP
+            case 0x0800: parseIPv4(buffer, offset, packetData); break;  // IPv4
+            case 0x86DD: parseIPv6(buffer, offset, packetData); break;  // IPv6
+            case 0x0806: parseARP(buffer, offset, packetData); break;   // ARP
             default:
                 LOGGER.log(Level.INFO, "Unsupported EtherType: {0}", ethType);
                 packetData.put("INFO", "Unsupported EtherType: " + ethType);         
         }
-
+        
         return packetData;
     }
 
@@ -84,10 +99,14 @@ public class PacketParserBuffer {
             byte[] srcMac = new byte[6];
             buffer.get(srcMac); 
             packetData.put("SRC_MAC", PacketUtils.bytesToMac(srcMac)); // Source MAC address (String)
-    
-            short ethType = buffer.getShort(); 
-            String eth_Type = PacketUtils.parseEtherType(ethType);
-            packetData.put("ETH_TYPE", eth_Type); // EtherType
+            short ethType = buffer.getShort();
+            packetData.put("ETH_TPE", ethType);
+            /*
+            if (ethType > 0){
+                String ethTypeString = PacketUtils.parseEtherType(ethType);
+                packetData.put("ETH_TYPE", ethTypeString); // EtherType
+            }
+             */
         } catch (Exception e) {
             LOGGER.warning("Ethernet header parsing failed: " + e.getMessage());
         }

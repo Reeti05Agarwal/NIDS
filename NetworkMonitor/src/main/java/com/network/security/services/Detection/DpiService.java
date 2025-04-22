@@ -19,11 +19,11 @@ public class DpiService {
     public void loadDpiDetectorKeywords(Map<String, Object> packetInfo) {
          try {
             System.out.println("[DPI KEYWORDS] Starting DPI Keywords Detection Function");
-            String payload = (String) packetInfo.get("TCP_PAYLOAD");
-            if (payload == null) return;
-            String srcIP = (String) packetInfo.get("SRC_IP");
+            String payload = (String) packetInfo.get("PAYLOAD");
+            // Removed redundant payload null check
+            String srcIP = (String) packetInfo.get("srcIP");
             if (srcIP == null) return;
-            String destIP = (String) packetInfo.get("DST_IP");
+            String destIP = (String) packetInfo.get("destIP");
             String protocol = (String) packetInfo.get("PROTOCOL");
             if (payload == null) return;
 

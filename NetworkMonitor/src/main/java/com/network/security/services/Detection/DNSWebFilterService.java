@@ -21,11 +21,11 @@ public class DNSWebFilterService {
     public void loadDnsWebFilterRules(Map<String, Object> packetInfo) {
         try { 
             
-            String domain = (String) packetInfo.get("HOST_HEADER");  
+            String domain = (String) packetInfo.get("HOST");  
             if (domain == null) return;
-            String srcIP = (String) packetInfo.get("SRC_IP");
+            String srcIP = (String) packetInfo.get("srcIP");
             if (srcIP == null) return;
-            String dstIP = (String) packetInfo.get("DST_IP");
+            String dstIP = (String) packetInfo.get("destIP");
             String protocol = (String) packetInfo.get("PROTOCOL");
             if (protocol == null) return;
             

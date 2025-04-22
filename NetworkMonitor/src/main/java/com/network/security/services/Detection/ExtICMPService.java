@@ -18,8 +18,8 @@ public class ExtICMPService {
     public void loadICMPRules(Map<String, Object> packetInfo) {
         try { 
             System.out.println("[EXTERNAL ICMP] Starting External ICMP Detection Function");
-            String srcIP = (String) packetInfo.get("SRC_IP");
-            String dstIP = (String) packetInfo.get("DST_IP");
+            String srcIP = (String) packetInfo.get("srcIP");
+            String dstIP = (String) packetInfo.get("destIP");
             String protocol = (String) packetInfo.get("PROTOCOL");
             if (srcIP == null || dstIP == null) return;
             

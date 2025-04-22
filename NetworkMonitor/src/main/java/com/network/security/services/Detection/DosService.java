@@ -21,9 +21,9 @@ public class DosService {
     public void loadDosService(Map<String, Object> packetInfo) {
         try { 
             System.out.println("[DDoS SERVICE] Starting DDoS Attack Detection Function");
-            String sourceIP = (String) packetInfo.get("SRC_IP");
+            String sourceIP = (String) packetInfo.get("srcIP");
             if (sourceIP== null) return;
-            String destIP = (String) packetInfo.get("DST_IP");
+            String destIP = (String) packetInfo.get("destIP");
             String protocol = (String) packetInfo.get("PROTOCOL");
 
             PacketTracker packetTracker = new PacketTracker(doSDetector.getDosTimeWindow());
@@ -34,7 +34,7 @@ public class DosService {
 
             switch ((String) packetInfo.get("PROTOCOL")) {
                 case "TCP":
-                    List<String> flags = (List<String>) packetInfo.get("TCP_FLAGS"); // Retrieving flags list
+                    List<String> flags = (List<String>) packetInfo.get("FLAGS"); // Retrieving flags list
 
                     if (flags.contains("SYN") && !flags.contains("ACK")) {
                         attackType = "SYN_FLOOD";
