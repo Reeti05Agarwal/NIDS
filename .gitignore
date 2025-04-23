@@ -1,5 +1,5 @@
 # Ignore config files with secrets
-NetworkMonitor/src/main/resources/configs/config.properties
+NetworkMonitor/config/config.properties
 
 # Ignore IDE-specific files
 .idea/

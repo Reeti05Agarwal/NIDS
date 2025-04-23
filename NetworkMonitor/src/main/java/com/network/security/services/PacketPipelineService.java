@@ -168,22 +168,14 @@ class PacketRetriever implements Runnable {
         System.out.println("[RETRIEVER] Thread Started");
         try {
             while (PacketPipelineService.running) {
-                System.out.println("[RETRIEVER]");
-                 
-             
+                //System.out.println("[RETRIEVER]");
                 long latestPacketID = PacketRetrieverDao.getLatestPacketID();
                 System.out.println("[RETRIEVER] Fetching packet with ID: " + latestPacketID);
                 Map<String, Object> packetInfo = PacketRetrieverDao.getPacketData(latestPacketID); 
                 System.out.println("[RETRIEVER] Packet Fetched: " + packetInfo);
-
-                for (Map.Entry<String, Object> packet : packetInfo.entrySet()) {
-                    Map<String, Object> singlePacketMap = Map.of(packet.getKey(), packet.getValue());
-                    detectionQueue.put(singlePacketMap);
-                    System.out.println("[RETRIEVER] Packet fetched from DB and added to DetectionQueue");
-                    LOGGER.info("[RETRIEVER] Packet fetched from DB and added to DetectionQueue: " + singlePacketMap);
-                }
-
-                //sleepWithInterruptCheck(5000);
+                detectionQueue.put(packetInfo);
+                System.out.println("[RETRIEVER] Packet added to DetectionQueue");
+                    
             }
         } catch (InterruptedException e) {
             System.out.println("[ERROR RETRIEVER] ");
@@ -191,15 +183,6 @@ class PacketRetriever implements Runnable {
             
         }
     }
-
-    // private void sleepWithInterruptCheck(long millis) throws InterruptedException {
-    //     long endTime = System.currentTimeMillis() + millis;
-    //     while (System.currentTimeMillis() < endTime) {
-    //         Thread.sleep(100); // sleep in smaller chunks
-    //         if (!PacketPipelineService.running) break;
-    //     }
-    // }
-    
 }
 
 class DetectionDispatcher implements Runnable {
@@ -228,12 +211,12 @@ class DetectionDispatcher implements Runnable {
         System.out.println("[DETECTOR] Thread Started");
         try {
             while (PacketPipelineService.running) {
-                System.out.println("[DETECTOR]");
+                //System.out.println("[DETECTOR]");
                 Map<String, Object> packetData = detectionQueue.take();
                 System.out.println("[DETECTOR] Retrieved packet from queue: " + packetData);
-                //LOGGER.info("[DETECTOR] Retrieved packet from queue: " + packetData);
+             
                 try{
-                    System.out.println("[DETECTOR] Packet sent to detection services: " + packetData);
+                    System.out.println("[DETECTOR] Packet sent to detection services");
                     detectionServicePool.submit(() -> bruteForceService.loadBruteForce(packetData));
                     detectionServicePool.submit(() -> dnsWebFilterService.loadDnsWebFilterRules(packetData));
                     detectionServicePool.submit(() -> dosService.loadDosService(packetData));

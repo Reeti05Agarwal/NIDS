@@ -4,8 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import com.network.security.Intrusion_detection.DoSDetector;
+
+// System.out.println("[DAO DDoS ATTACK] ");
 
 public class DoSDetectorDao {
     private DoSDetector doSDetector;
@@ -38,6 +39,7 @@ public class DoSDetectorDao {
                 doSDetector.setDosTimeWindow(rs.getInt("time_window_sec"));
                 doSDetector.setSeverity(rs.getString("severity"));
             }
+            
             System.out.println("[DAO DDoS ATTACK] Thresholds loaded");
 
         } catch (SQLException e) {

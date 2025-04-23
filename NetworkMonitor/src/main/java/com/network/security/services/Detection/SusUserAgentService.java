@@ -8,55 +8,57 @@ import com.network.security.util.DBConnection;
 import com.network.security.util.PacketUtils;
 import com.network.security.services.AlertService;
 
+// System.out.println("[SUS USER AGENT] ");
+
 public class SusUserAgentService {
     SuspiciousUserAgentDetection susUserAgentDetection;
     SuspiciousUserAgentDao susUserAgentDao;
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SusUserAgentService.class);
     AlertService alertService = new AlertService(); 
     Connection conn = DBConnection.getConnection();
 
     public void loadSuspiciousUserAgent(Map<String, Object> packetInfo) {
         try {
             System.out.println("[SUS USER AGENT] Starting Suspicious User Agent Detection Function");
-            Integer srcPort = (Integer) packetInfo.get("srcPort"); 
-            if (srcPort == null) return;
-            Integer dstPort = (Integer) packetInfo.get("destPort");
-            String srcIP = (String) packetInfo.get("srcIP");
-            if (srcIP == null) return;
-            String dstIP = (String) packetInfo.get("destIP");
-            String protocol = (String) packetInfo.getOrDefault("PROTOCOL", "ICMP");
-            
-            if (srcPort == -1) {
-                LOGGER.warn("SRC_PORT is null or invalid in the packet: " + packetInfo);
-                return; // Exit from the method or continue with the next iteration
+            Integer srcPort = null;
+            Integer dstPort = null;
+            String srcIP = null;
+            String dstIP = null;
+            String protocol = null;
+            String userAgent = null;
+
+            if (packetInfo.get("srcPort") != null){
+            srcPort = (Integer) packetInfo.get("srcPort"); 
+            dstPort = (Integer) packetInfo.get("destPort");
+            } else {
+                System.out.println("[EXTERNAL ICMP] Source and Destination Port is NULL");
+                return;
             }
+            srcIP = (String) packetInfo.get("srcIP");
+            dstIP = (String) packetInfo.get("destIP");
+            protocol = (String) packetInfo.getOrDefault("PROTOCOL", "ICMP");
             
-            if (dstPort == -1) {
-                LOGGER.warn("DST_PORT is null or invalid in the packet: " + packetInfo);
-                return; // Exit from the method or continue with the next iteration
-            }
+         
              
             // Check if the packet is HTTP
             if ("HTTP".equals(PacketUtils.parseGetService(srcPort, dstPort))){
-                String userAgent = (String) packetInfo.get("user_agent");  
-                if (userAgent == null) return; 
-
-                if (conn == null) {
-                    System.out.println("[CONN ERROR] Database connection is null");
-                    LOGGER.error("[CONN ERROR] Database connection is null");
+                if (packetInfo.get("user_agent") != null){
+                    userAgent = (String) packetInfo.get("user_agent");  
+                } else{
+                    System.out.println("[EXTERNAL ICMP] User Agent is NULL");
                     return;
                 }
-                susUserAgentDao.loadSuspiciousUserAgent(conn); 
-                System.out.println("Thresholds loaded"); 
+                      
+                if (conn == null) {
+                    System.out.println("[CONN ERROR] Database connection is null");
+                    return;
+                }
 
-                if (susUserAgentDetection == null) {
-                    susUserAgentDetection = new SuspiciousUserAgentDetection();
-                }        
+                susUserAgentDao.loadSuspiciousUserAgent(conn); 
+                System.out.println("[EXTERNAL ICMP] Thresholds loaded");       
                 boolean detected = susUserAgentDetection.detect(userAgent);  
 
                 if (detected) {
                     System.out.println("[ALERT] [HTTP] Suspicious User-Agent detected: " + userAgent);
-                    LOGGER.info("[HTTP] Suspicious User-Agent detected: " + userAgent);
                     alertService.triggerAlert(
                         conn,
                         srcIP != null ? srcIP : "UNKNOWN",
@@ -64,16 +66,15 @@ public class SusUserAgentService {
                         protocol,
                         4, // Assume rule_id = 4 for External ICMP detection
                         susUserAgentDetection.getSeverity(),
-                        "[External ICMP Detection] Blacklisted IP triggered alert"
+                        "[External ICMP] Blacklisted IP triggered alert"
                     );
                 }
                 else{
-                    System.out.println("NO Suspicious User-Agent detected: " + userAgent);
+                    System.out.println("[EXTERNAL ICMP] NO Suspicious User-Agent detected: " + userAgent);
                 }
             }
         } catch (Exception e) {
-            System.err.println("[ERROR] Failed to load Suspicious User Agent List");
-            LOGGER.error("[ERROR] Failed to load Suspicious User Agent List", e);
+            System.err.println("[ERROR] [EXTERNAL ICMP] Failed to load Suspicious User Agent List");
             e.printStackTrace();
         }
         return;

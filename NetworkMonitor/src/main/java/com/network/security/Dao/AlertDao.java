@@ -25,7 +25,7 @@ public class AlertDao {
             System.out.println("[INFO] Alert inserted successfully.");
 
         } catch (SQLException e) {
-            Logger.getLogger(AlertDao.class.getName()).log(Level.SEVERE, "[ERROR] Failed to insert alert", e);
+            System.out.println("[ERROR] Failed to insert alert");
         }
     }
 

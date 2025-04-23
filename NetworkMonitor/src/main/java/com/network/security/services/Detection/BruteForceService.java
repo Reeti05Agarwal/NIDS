@@ -23,29 +23,34 @@ public class BruteForceService {
     public void loadBruteForce(Map<String, Object> packetInfo) {
         try { 
             System.out.println("[BRUTE FORCE] Starting Brute Force Detection Function");
-            Integer srcPort = (Integer) packetInfo.get("srcPort"); 
-            
-            Integer dstPort = (Integer) packetInfo.get("destPort");
-            String srcIP = (String) packetInfo.get("srcIP");
-            String dstIP = (String) packetInfo.get("destIP");
+            Integer srcPort = null;
+            Integer dstPort = null;
+            String srcIP = null;
+            String dstIP = null;
 
-            System.out.println("[BRUTE FORCE] " + srcIP);
-            if (srcIP == null){
-                System.out.println("[BRUTE FORCE] IP ADDRESS NULL");
-                return;
-            } 
-            System.out.println("[BRUTE FORCE] " + srcPort);
-            System.out.println("[BRUTE FORCE] " + dstPort);
-            if (srcPort == null && dstPort == null) 
-            {
+            if (packetInfo.get("srcPort") != null){
+                srcPort = (Integer) packetInfo.get("srcPort"); 
+                dstPort = (Integer) packetInfo.get("destPort");
+                System.out.println("[BRUTE FORCE] Source Port: " + srcPort + " Dest Port: " + dstPort);
+            }
+            else{
                 System.out.println("[BRUTE FORCE] PORTS NULL");
                 return;
-            }
+            } 
 
+            if ( packetInfo.get("srcIP") != null){
+                srcIP = (String) packetInfo.get("srcIP");
+                dstIP = (String) packetInfo.get("destIP");
+                System.out.println("[BRUTE FORCE] Source IP: " + srcIP + " Dest IP: " + dstIP);
+            } 
+            else{
+                System.out.println("[BRUTE FORCE] IP ADDRESS NULL");
+                return;
+            }
+            
             String service = PacketUtils.parseGetService(srcPort, dstPort); // SERVICE
             System.out.println(service);
-            if (service == null)
-            {
+            if (service == null){
                 System.out.println("[BRUTE FORCE] SERVICW NULL");
                 return;
             } 

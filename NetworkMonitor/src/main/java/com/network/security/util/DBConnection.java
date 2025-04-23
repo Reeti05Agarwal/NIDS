@@ -1,5 +1,6 @@
 package com.network.security.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Connection;
@@ -9,27 +10,45 @@ import java.util.Properties;
 
 public class DBConnection {
 
-    private static final String CONFIG_FILE_PATH = "NetworkMonitor/src/main/resources/configs/config.properties";  // Update path as needed
+    private static String dbUrl;
+    private static String dbUser;
+    private static String dbPass;
 
+    // Make sure loadConfig returns the Properties
     public static Properties loadConfig() {
-        Properties properties = new Properties();
-        try (FileInputStream input = new FileInputStream(CONFIG_FILE_PATH)) {
-            properties.load(input);
+        Properties props = new Properties();
+        try {
+            // Use absolute path for debugging
+            String absolutePath = "C:/Users/Reeti/Documents/nids/NetworkMonitor/config/config.properties";
+            File configFile = new File(absolutePath); 
+            FileInputStream fis = new FileInputStream(configFile);
+            props.load(fis);
+             
+
         } catch (IOException e) {
-            System.err.println("[ERROR] Could not load config file: " + CONFIG_FILE_PATH);
-            e.printStackTrace();
+            System.err.println("[ERROR] Could not load config file: " + e.getMessage());
         }
-        return properties;
+        return props;  // Return the Properties object
     }
+    
 
     public static Connection getConnection() {
-        Properties config = loadConfig();  // ✅ Now it's declared
+        Properties config = loadConfig();  // Load config to get database details
         try {
+            // Get database URL, user, and password from config file
+            dbUrl = config.getProperty("db.url");
+            dbUser = config.getProperty("db.username");
+            dbPass = config.getProperty("db.password");
+            
+            // Ensure config properties are available
+            if (dbUrl == null || dbUser == null || dbPass == null) {
+                System.err.println("[ERROR] Missing database configuration.");
+                return null;
+            }
+
+            // Load JDBC driver and establish connection
             Class.forName("com.mysql.cj.jdbc.Driver");
-            String dbUrl = config.getProperty("db.url");
-            String dbUser = config.getProperty("db.user");
-            String dbPassword = config.getProperty("db.password");
-            return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+            return DriverManager.getConnection(dbUrl, dbUser, dbPass);
         } catch (ClassNotFoundException | SQLException e) {
             System.err.println("[ERROR] Failed to connect to database");
             e.printStackTrace();

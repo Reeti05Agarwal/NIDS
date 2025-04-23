@@ -8,6 +8,7 @@ com\network\security\services\Detection\BruteForceService.class
 com\network\security\ui\LogsPanel$1.class
 com\network\security\Dao\Detection\DoSDetectorDao.class
 com\network\security\ui\SignUpFrame.class
+com\network\security\Dao\EvaluatedDao.class
 com\network\security\ui\MainFrame.class
 com\network\security\ui\RulesOverviewPanel.class
 com\network\security\Intrusion_detection\DoSDetector.class
@@ -33,11 +34,11 @@ com\network\security\services\Detection\DNSWebFilterService.class
 com\network\security\util\PacketTracker$TrafficStats.class
 com\network\security\Intrusion_detection\DpiDetector.class
 com\network\security\security\FirewallService.class
-com\network\security\util\ConfigLoader.class
 com\network\security\services\BlacklistService.class
 com\network\security\services\AlertService.class
 com\network\security\Dao\Detection\ExtICMPDao.class
 com\network\security\Dao\LogDao.class
+com\network\security\PacketSniffing\PacketLogs.class
 com\network\security\Intrusion_detection\MalwareSigDetection.class
 com\network\security\entity\User.class
 com\network\security\Dao\Detection\DpiDetectorDao.class
@@ -55,6 +56,7 @@ com\network\security\Dao\Detection\InsiderThreatDao.class
 com\network\security\ui\MainFrame$TextAreaOutputStream.class
 com\network\security\Intrusion_detection\NonStandardPorts.class
 com\network\security\auth\Admin.class
+com\network\security\PacketSniffing\PacketLogs$1.class
 com\network\security\services\Detection\ExtICMPService.class
 com\network\security\services\Detection\DosService.class
 com\network\security\Dao\Detection\BruteForceDao.class
@@ -64,6 +66,7 @@ com\network\security\services\PacketRetriever.class
 com\network\security\ui\LogsPanel.class
 com\network\security\Intrusion_detection\ExtICMPDetection.class
 com\network\security\Dao\AlertDao.class
+com\network\security\Dao\Logs\RetrievalLog.class
 com\network\security\ui\BlockedIPPanel.class
 com\network\security\util\PacketUtils.class
 com\network\security\Dao\BlacklistDao.class
