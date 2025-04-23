@@ -74,8 +74,10 @@ public class UserService {
      * Ensures the email matches a standard pattern.
      */
     private void validateEmail(String email) throws PasswordValidationException {
-        if (email == null || !email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            throw new PasswordValidationException("Invalid email format. Please enter a valid email address.");
+        if (email == null
+                || !email.matches("^(?!.*\\.com\\.)[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.com$")) {
+            throw new PasswordValidationException(
+            "Invalid email format. Must be like user@domain.com");
         }
     }
 
