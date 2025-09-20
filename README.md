@@ -1,7 +1,3 @@
-Here’s a structured **README.md** file for your **Rule-Based NIDS project**:
-
----
-
 # Rule-Based Network Intrusion Detection System (NIDS)
 
 ## About the Project
