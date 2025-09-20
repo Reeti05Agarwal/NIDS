@@ -2,9 +2,9 @@ Here’s a structured **README.md** file for your **Rule-Based NIDS project**:
 
 ---
 
-# 🚨 Rule-Based Network Intrusion Detection System (NIDS)
+# Rule-Based Network Intrusion Detection System (NIDS)
 
-## 📖 About the Project
+## About the Project
 
 The **Rule-Based NIDS** is a high-performance **network intrusion detection system** designed to strengthen enterprise security posture. It detects and prevents known attacks using a predefined set of **rules and signatures**, ensuring **fast and reliable** threat identification.
 
@@ -14,20 +14,20 @@ The project also provides **automated logging, alerting, and reporting**, making
 
 ---
 
-## ✨ Features
+## Features
 
-* ✅ **Rule-based detection** of known network threats (DDoS, brute force, insider threats, etc.)
-* ✅ **MySQL-backed storage** for packets, alerts, incidents, and users
-* ✅ **User management** (create, update, delete, change roles)
-* ✅ **Alert generation** for suspicious activity
-* ✅ **Triggers and stored procedures** for automatic detection of anomalies
-* ✅ **Logging and reporting** for audits and investigations
-* ✅ **Swing-based UI** for management and monitoring
-* ✅ **Extensible architecture** for future anomaly-based or AI-powered detection
+*  **Rule-based detection** of known network threats (DDoS, brute force, insider threats, etc.)
+*  **MySQL-backed storage** for packets, alerts, incidents, and users
+*  **User management** (create, update, delete, change roles)
+*  **Alert generation** for suspicious activity
+*  **Triggers and stored procedures** for automatic detection of anomalies
+*  **Logging and reporting** for audits and investigations
+*  **Swing-based UI** for management and monitoring
+*  **Extensible architecture** for future anomaly-based or AI-powered detection
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 * **Programming Language:** Java (Swing for UI)
 * **Database:** MySQL
@@ -42,7 +42,7 @@ The project also provides **automated logging, alerting, and reporting**, making
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 Rule-Based-NIDS/
@@ -64,7 +64,7 @@ Rule-Based-NIDS/
 
 ---
 
-## 🗄️ Database Design
+## Database Design
 
 ### Key Tables
 
@@ -96,18 +96,18 @@ Rule-Based-NIDS/
 
 ---
 
-## 🔍 Intrusion Detection Capabilities
+## Intrusion Detection Capabilities
 
-* 🛡️ **Denial of Service (DoS/DDoS)** detection
-* 🔑 **Brute force attack** detection
-* 🔍 **Deep Packet Inspection (DPI)** for suspicious headers
-* 🌐 **Port scanning** activity monitoring
-* 🕵️ **Insider threat detection** (e.g., abnormal file access)
-* 📦 **Packet sniffing & parsing** for real-time monitoring
+* **Denial of Service (DoS/DDoS)** detection
+* **Brute force attack** detection
+* **Deep Packet Inspection (DPI)** for suspicious headers
+* **Port scanning** activity monitoring
+* **Insider threat detection** (e.g., abnormal file access)
+* **Packet sniffing & parsing** for real-time monitoring
 
 ---
 
-## ⚡ Network Protocol Coverage
+## Network Protocol Coverage
 
 The system analyzes packets across all OSI layers:
 
@@ -118,15 +118,15 @@ The system analyzes packets across all OSI layers:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### 1️⃣ Prerequisites
+### Prerequisites
 
 * **Java 11+**
 * **MySQL 8.0+**
 * **Maven/Gradle** for dependency management
 
-### 2️⃣ Setup Instructions
+### Setup Instructions
 
 1. Clone the repository:
 
@@ -147,5 +147,4 @@ The system analyzes packets across all OSI layers:
    ```
 5. Launch the **Swing UI** or access via REST APIs for monitoring.
  
-
-Do you want me to also add **example screenshots/mockups of the Swing UI & database schema diagram** to the README so it looks more professional for GitHub?
+ 
