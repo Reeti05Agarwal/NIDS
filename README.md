@@ -1,305 +1,151 @@
-<<<<<<< HEAD
-# 🚀 Network Security Monitoring System 🔒
-
-This project is a comprehensive network security monitoring system that captures, parses, categorizes, and analyzes network traffic in real time. It uses an AI model for anomaly detection and helps identify threats such as DDoS attacks, brute force attempts, malware payloads, and data exfiltration.
+Here’s a structured **README.md** file for your **Rule-Based NIDS project**:
 
 ---
 
-## 📑 Table of Contents
+# 🚨 Rule-Based Network Intrusion Detection System (NIDS)
 
-- [File Structure](#file-structure)
-- [Processing Flow](#processing-flow)
-- [Database Schema & Packet Metadata](#database-schema--packet-metadata)
-- [Network Protocol Layers](#network-protocol-layers)
-- [Security Attacks](#security-attacks)
-- [Conclusion](#conclusion)
+## 📖 About the Project
 
----
+The **Rule-Based NIDS** is a high-performance **network intrusion detection system** designed to strengthen enterprise security posture. It detects and prevents known attacks using a predefined set of **rules and signatures**, ensuring **fast and reliable** threat identification.
 
-## 📂 File Structure
+This system integrates with a **MySQL database** that efficiently organizes large-scale packet datasets, alerts, and incident reports. Real-time analysis of traffic across all layers of the network — from packet metadata to transport details — ensures rapid detection with **low false positives**.
 
-src/
- ├── main/
- │   ├── java/com/network/security/
- │   │   ├── controller/
- │   │   ├── service/
- │   │   ├── repository/
- │   │   ├── model/
- │   │   ├── util/
- │   │   ├── security/
- │   ├── resources/
- │   │   ├── application.properties
- │   │   ├── log4j2.xml
- │   │   ├── schema.sql
- ├── test/java/com/network/security/
- │   ├── service/UserServiceTest.java
- │   ├── service/NetworkMonitorTest.java
-
+The project also provides **automated logging, alerting, and reporting**, making it scalable and adaptable for integration into enterprise security infrastructures.
 
 ---
 
-## 🔄 Processing Flow
+## ✨ Features
 
-- **🏁 Start**
-- **📡 Packet Capture**
-  - Capture network packets in real time.
-  - Extract network packet details.
-  - Store raw packets in a temporary buffer (initial storage).
-- **🔍 Packet Parsing & Metadata Extraction**
-  - Extract important fields such as headers, payloads, timestamps, and ports.
-- **🗂️ Traffic Categorisation**
-  - Classify packets based on protocols (TCP, UDP, HTTP, etc).
-- **🤖 Anomaly Detection (AI Model)**
-  - Analyze packet behavior against historical trends.
-  - Identify anomalies such as:
-    - **DDoS Attack:** Abnormal traffic spikes.
-    - **Brute Force Attack:** Multiple failed logins.
-    - **Malware Payload:** Suspicious file hashes or IPs.
-    - **Data Exfiltration:** Large outbound transfers.
-- **💾 Store Packets in MySQL Database**
-  - Save metadata, anomalies, and flagged packets.
-  - Keep logs for forensic analysis.
-- **🚨 Real-Time Alert Generation**
-  - If an anomaly is detected, raise an alert and notify the admin.
-- **📊 Network Traffic Visualization**
-  - Display line charts, alert panels, and tables.
-- **👨‍💻 User Action**
-  - Admin/User reviews the traffic and takes necessary security actions (e.g., block IP, adjust firewall rules).
-- **📝 Report Generation & Exporting**
-  - Generate PDF/CSV reports on detected anomalies.
-  - Store reports for compliance and audit.
+* ✅ **Rule-based detection** of known network threats (DDoS, brute force, insider threats, etc.)
+* ✅ **MySQL-backed storage** for packets, alerts, incidents, and users
+* ✅ **User management** (create, update, delete, change roles)
+* ✅ **Alert generation** for suspicious activity
+* ✅ **Triggers and stored procedures** for automatic detection of anomalies
+* ✅ **Logging and reporting** for audits and investigations
+* ✅ **Swing-based UI** for management and monitoring
+* ✅ **Extensible architecture** for future anomaly-based or AI-powered detection
 
 ---
+
+## 🛠️ Tech Stack
+
+* **Programming Language:** Java (Swing for UI)
+* **Database:** MySQL
+* **Backend Services:** Stored Procedures, Functions, Triggers
+* **Authentication:** Password hashing, JWT, OAuth2, API tokens
+* **Security Features:**
+
+  * Login rate limiting
+  * Secure credential storage
+  * Session/token expiration
+* **Other Utilities:** JSON parsing, regex filtering, log formatting, IP range checks
+
+---
+
+## 📂 Project Structure
+
+```
+Rule-Based-NIDS/
+│
+├── src/main/resources/
+│   ├── schema.sql                # Database schema
+│   ├── ui/                       # UI (HTML, CSS, JS, Swing)
+│
+├── src/main/java/com/network/security/
+│   ├── auth/                     # Authentication logic (login, tokens, hashing)
+│   ├── controller/               # REST APIs or UI event handlers
+│   ├── dao/                      # DAO layer (MySQL interaction for packets, alerts, users, rules)
+│   ├── entity/                   # POJOs mapping to MySQL tables
+│   ├── services/                 # Intrusion detection, classification, alerts, threshold mgmt
+│   ├── util/                     # Helper functions (JSON parsing, regex, IP range checks)
+│
+└── README.md
+```
+
+---
+
+## 🗄️ Database Design
+
+### Key Tables
+
+* **Users** → Stores user credentials, roles, and access levels
+* **Packet Data Tables** → Holds metadata for captured packets
+* **Alerts** → Stores alerts generated by detection mechanisms
+* **Rules Tables** → Holds predefined rules (DDoS thresholds, brute force attempts, insider threats, etc.)
+* **Blacklist Tables** → Stores blacklisted domains and ports
+
+### Example Functions & Procedures
+
+* **Functions**
+
+  * `validate_packet_length(packet_size)` → Detects anomalies in packet size
+  * `validate_packet(packet_data)` → Detects malformed packets
+
+* **Stored Procedures**
+
+  * `sp_add_user()` / `sp_update_user()` / `sp_delete_user()` / `sp_change_user_role()`
+  * `check_ddos_attack()` → Detects DDoS by comparing packet count against threshold
+  * `detect_brute_force_attack()` → Detects repeated failed logins
+  * `detect_insider_threat()` → Detects excessive or suspicious access patterns
+
+* **Triggers**
+
+  * `block_blacklisted_ports` → Prevents packets on blacklisted ports
+  * `block_blacklisted_domains` → Flags access to malicious domains
+  * `detect_suspicious_user_agents` → Detects malicious user agents
+
+---
+
+## 🔍 Intrusion Detection Capabilities
+
+* 🛡️ **Denial of Service (DoS/DDoS)** detection
+* 🔑 **Brute force attack** detection
+* 🔍 **Deep Packet Inspection (DPI)** for suspicious headers
+* 🌐 **Port scanning** activity monitoring
+* 🕵️ **Insider threat detection** (e.g., abnormal file access)
+* 📦 **Packet sniffing & parsing** for real-time monitoring
+
+---
+
+## ⚡ Network Protocol Coverage
+
+The system analyzes packets across all OSI layers:
+
+* **Data Link Layer:** Ethernet, Wi-Fi headers
+* **Network Layer:** IPv4, IPv6 headers
+* **Transport Layer:** TCP, UDP headers
+* **Application Layer:** HTTP/HTTPS, DNS, TLS/SSL headers
+
+---
+
+## 🚀 Getting Started
+
+### 1️⃣ Prerequisites
+
+* **Java 11+**
+* **MySQL 8.0+**
+* **Maven/Gradle** for dependency management
+
+### 2️⃣ Setup Instructions
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/your-username/Rule-Based-NIDS.git
+   ```
+2. Create the database using the schema file:
+
+   ```sql
+   source src/main/resources/schema.sql;
+   ```
+3. Configure database credentials in `application.properties` (or config file).
+4. Build and run the project:
+
+   ```bash
+   mvn clean install
+   java -jar target/rule-based-nids.jar
+   ```
+5. Launch the **Swing UI** or access via REST APIs for monitoring.
  
-## ⚠️ Security Attacks
 
-### ARP Attacks
-- **Unexpected ARP Replies:** May indicate spoofing.
-- **Frequent MAC-IP Changes:** Possible malicious activity.
-- **Unusual Protocol Values:** Abnormal values may suggest an attack.
-
-#### ARP Spoofing
-- **Indicators:**  
-  - `src_mac`  
-  - `src_IP`  
-  - `OPER`
-
-#### ARP Cache Poisoning
-- **Indicators:**  
-  - `src_ip`  
-  - `dest_ip`  
-  - `dest_mac`
-
-#### ARP DoS
-- **Indicators:**  
-  - `HTYPE`  
-  - `PTYPE`  
-  - `HLEN`  
-  - `PLEN`  
-  - `src_mac`  
-  - `OPER`
-
-#### Gratuitous ARP Spoofing
-- **Indicators:**  
-  - `src_ip`  
-  - `dest_ip`  
-  - `src_mac`
- 
-=======
- 
-
- 
-
-# Rule-Based Intrusion and Anomally Detection System
-
-## Rule-Based IDS
-Uses predefined rules to detect malicious traffic.
-File: .json
-
-### Blacklist Rules
-- blacklisted_ips {lets see}
-- blacklisted_ports {lets see}
-
-### Port Scanning Detection
-- syn_flood_threshold
-- fiin_flood_threshold
-- xmas_flood_threshold
-- null_flood_threshold
-- icmp_flood_threshold
-- port_flood_threshold
-
-### Protocol Violation Rules
-- restricted_protocols
-- non_standard_ports
-- block_external_icmp
-- detect_malformed_packets
-- invalid_tcp_flags
-- packet_size_limits
-
-### Dos/ DDoS Attack
-- syn_flood_threshold
-- icmp_flood_threshold
-- udp_flood_threshold
-- http_flood_threshold
-- slowloris_threshold
-
-### Packet Ispection Rules
-- dpi_keywords
-- payload_length_threshold
-- encrypted_traffic_check
-
-### Brute-Force Attack Detection
-- ssh_brute_force_threshold
-- ftp_brute_force_threshold
-- http_auth_brute_force_threshold
-- email_brute_force_threshold
-
-### Insider Threat Detection
-- lateral_movement_threshold
-- data_exfil_threshold
-- privilege_escalation_detection
-
-### DNS & Web Filtering
-- blacklisted_domains
-- dns_tunneling_threshold
-- typosquatting_detection
-- suspicious_user_agents
-
-
-### Logging & Alerting Config
-- log_level
-- alert_methods  {["email", "syslog"]}
-- log_retention_days
-- adaptive_thresholding
-
-## Anomaly Detection
-Compares traffic patterns to a baseline of normal activity.
-
-### Monitoring
-- Traffic Baseline Monitoring
-- Threshhold Based Detection
-- Machine Learning 
-
-
-### Maintain Packet Statistics
-
-- Total Packets per sec
-- TCP SYN packets per second
-- ICMP packets per second
-
-
-<<<<<<< HEAD
----
-
-## 🤝 Conclusion
-
-This README provides an in-depth overview of the system's file structure, processing flow, database schema, detailed network protocol headers, and potential security attacks. It serves as a reference guide for developers and security analysts to understand the project architecture and functionality.
-
-*Happy Securing! 🔒*
-=======
-
-# AI - Based Intrusion and Anomally Detection
-
-## Structured Data 
-- Randon Forest
-- XGBoost
-- Support Vector Machines
-- Isolation Forest
-
-## For Sequential Data
-- RNN
-- LSTM
-- Autoencoders
-- Transformer Models
-
-## Reinforcement Learning
-- PPO
-
-
-# Alert & Response System
-
-- Logging it in database
-- Sending an alert to admin {email, syslog}
-- Take Action {Block IP, Update Firewall}
-
-# Visualization
-
-## Real Time Network Traffic Monitoring
-
-- Line graph
-- Number of packets processed 
-
-
-## Suspicios Activity
-
-- Donut Chart
-- Categories of detected threats {Port Snanning, DDoS Attack, Malformed Packets}
-
-## Toop Malicious IP
-
-- Bar Chart
-- IPs that triggered most rules/anomalies.
-- Identifies recurring threats or botnets
-
-## AI Based Anomaly Detection over Time
-
-- Scatter Plot
-- Ai anoaly score per packets/session
-- Detect Suspicious clusters of traffic
-{x-axis: timestamp
-y-axis: Anomaly score}
-
-## Geolocation Mpa of Attack Sources
-
-- World Map
-- Locations of Malicious IPs
-- Locations of high traffic pin points
-
-## Port Activity Analysis
-
-- Stacked Bar Chart
-- Number of Connection attempts per port
-{Identify suspicious access attempts on certain ports}
-
-## Attack Trends Over Time {Time Series Analysis}
-
-- Time-Series Line Chrt
-- Number of Attacks detected per minute/hour/day
-{
-    x-axis: every hour
-    y-axis: total detected intrusion
-    Trendlines: Attack surges
-}
-
-## Top 10 Most Attacked Services & Protocols
-
-- Stacked Bar Chart
-- Number of attacks on different services {HTTP, SSH, FTP}
-
-## Protocol-Based Anomaly Detection
-
-- Bubble Chart
-- Anomaly Score for each protocol detected
-
-## Failed vs Succcessful intrusion attempts
-
-- Cuage Chart
-- Count of total attacks attempts vs successfull intrusion
-
-## Correlation btw Attacks & Traffic Spikes
-
-- Dual-Axis Line chrt
-- Total network traffic vs detected atatcks
-
-# PDF Reports
-
-## Components in PDF
-- Sumaary of intrusion in past & days / 1 Month
-- Most frequent Attack Vector
-- List of Blacklisted IPs
-- AI based Anomaly score analysis
-- Geolocation of attackers
-- Port Scanning attempts
-
-{Apache PDFBox}
->>>>>>> 808a343 (Updated packet handling services and removed IpV4Headers.md)
+Do you want me to also add **example screenshots/mockups of the Swing UI & database schema diagram** to the README so it looks more professional for GitHub?
